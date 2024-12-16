@@ -1,9 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom/client"; // Use `react-dom/client` for React 18
+import App from "./App";
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+// Get the root element
+const rootElement = document.getElementById("root");
+
+// Create the root using `createRoot`
+const root = ReactDOM.createRoot(rootElement);
+
+// Render the app using the new API
+root.render(<App />);

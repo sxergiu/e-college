@@ -35,35 +35,4 @@ function App() {
   );
 }
 
-const App = () => {
-    const [users, setUsers] = useState([]);
-
-    useEffect(() => {
-        // Fetch all users on component mount
-        async function fetchUsers() {
-            const result = await getAllUsers();
-            setUsers(result); // Update state with the fetched users
-        }
-
-        fetchUsers();
-    }, []); // Empty dependency array means this runs once after the component mounts
-
-    return (
-        <div>
-            <h1>All Users</h1>
-            <ul>
-                {users.length > 0 ? (
-                    users.map((user) => (
-                        <li key={user.id}>
-                            <strong>{user.username}</strong>: {user.email}
-                        </li>
-                    ))
-                ) : (
-                    <p>No users found</p>
-                )}
-            </ul>
-        </div>
-    );
-};
-
 export default App;

@@ -1,6 +1,6 @@
 package com.ecampus.Ecampus.firebase;
 
-import com.ecampus.Ecampus.firebase.Services.FirebaseAuthService;
+//import com.ecampus.Ecampus.firebase.Services.FirebaseAuthService;
 import com.ecampus.Ecampus.firebase.Services.FirebaseService;
 import com.ecampus.Ecampus.user.User;
 import com.google.firebase.auth.FirebaseToken;
@@ -14,15 +14,15 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("/user")
 public class FirebaseController
 {
-    @Autowired
-    private FirebaseAuthService firebaseAuthService;
+//    @Autowired
+//    private FirebaseAuthService firebaseAuthService;
 
     private final FirebaseService firebaseService;
 
-    public FirebaseController(FirebaseService firebaseService, FirebaseAuthService firebaseAuthService)
+    public FirebaseController(FirebaseService firebaseService)
     {
         this.firebaseService = firebaseService;
-        this.firebaseAuthService = firebaseAuthService;
+       // this.firebaseAuthService = firebaseAuthService;
     }
 
     @PostMapping("/addUser")
@@ -32,21 +32,26 @@ public class FirebaseController
     }
 
     @GetMapping("/getUser")
-    public User getUser(@RequestParam String documentID) throws ExecutionException, InterruptedException
+    public ResponseEntity<User> getUser(@RequestParam(required = true) String username) throws ExecutionException, InterruptedException
     {
-        return firebaseService.getUser(documentID);
+        User user = firebaseService.getUser(username);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(404).body(null); // Return 404 if user is not found
+        }
     }
 
-//    @PutMapping("/updateUser")
-//    public String updateUser(@RequestBody User user) throws ExecutionException, InterruptedException
-//    {
-//        return firebaseService.updateUser(user);
-//    }
+    @PutMapping("/updateUser")
+    public String updateUser(@RequestBody User user) throws ExecutionException, InterruptedException
+    {
+        return firebaseService.updateUser(user);
+    }
 
     @DeleteMapping("/deleteUser")
-    public String deleteUser(@RequestParam String documentID) throws ExecutionException, InterruptedException
+    public String deleteUser(@RequestParam(required = true) String username) throws ExecutionException, InterruptedException
     {
-        return firebaseService.deleteUser(documentID);
+        return firebaseService.deleteUser(username);
     }
 
 }

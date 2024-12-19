@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth_context'
 import { doSignOut } from '../../firebase/auth'
@@ -7,6 +7,18 @@ import { Home, LayoutDashboard, MessageCircle, Bell } from 'lucide-react'
 const Header = () => {
     const navigate = useNavigate()
     const { userLoggedIn } = useAuth()
+
+    const handleLogout = useCallback(async () => {
+        try {
+            await doSignOut()
+            // Wrap navigation in setTimeout to avoid concurrent rendering issues
+            setTimeout(() => {
+                navigate('/login', { replace: true })
+            }, 0)
+        } catch (error) {
+            console.error("Logout error:", error)
+        }
+    }, [navigate])
 
     return (
         <nav className='flex flex-row justify-between w-full z-20 fixed top-0 left-0 h-12 border-b bg-gray-200 px-4'>
@@ -32,7 +44,7 @@ const Header = () => {
                 )}
             </div>
 
-            {/* Center section - can be used for logo or title */}
+            {/* Center section */}
             <div className='flex items-center'>
             </div>
 
@@ -53,11 +65,7 @@ const Header = () => {
                             <Bell size={20} />
                         </Link>
                         <button 
-                            onClick={() => { 
-                                doSignOut().then(() => { 
-                                    navigate('/login') 
-                                }) 
-                            }} 
+                            onClick={handleLogout}
                             className='text-sm text-blue-600 hover:text-blue-800'
                         >
                             Logout

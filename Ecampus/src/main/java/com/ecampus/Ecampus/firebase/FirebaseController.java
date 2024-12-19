@@ -2,9 +2,7 @@ package com.ecampus.Ecampus.firebase;
 
 //import com.ecampus.Ecampus.firebase.Services.FirebaseAuthService;
 import com.ecampus.Ecampus.firebase.Services.FirebaseService;
-import com.ecampus.Ecampus.user.User;
-import com.google.firebase.auth.FirebaseToken;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ecampus.Ecampus.entities.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

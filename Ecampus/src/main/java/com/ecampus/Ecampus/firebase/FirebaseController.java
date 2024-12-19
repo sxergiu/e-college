@@ -1,49 +1,57 @@
 package com.ecampus.Ecampus.firebase;
 
-import com.ecampus.Ecampus.firebase.Services.FirebaseAuthService;
+//import com.ecampus.Ecampus.firebase.Services.FirebaseAuthService;
 import com.ecampus.Ecampus.firebase.Services.FirebaseService;
+import com.ecampus.Ecampus.user.User;
 import com.google.firebase.auth.FirebaseToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.ExecutionException;
 
 @RestController
+@RequestMapping("/user")
 public class FirebaseController
 {
-    @Autowired
-    private FirebaseAuthService firebaseAuthService;
+//    @Autowired
+//    private FirebaseAuthService firebaseAuthService;
 
     private final FirebaseService firebaseService;
 
     public FirebaseController(FirebaseService firebaseService)
     {
         this.firebaseService = firebaseService;
+       // this.firebaseAuthService = firebaseAuthService;
     }
 
-    @GetMapping("/addUser")
-    public String addUser(){
-        firebaseService.addData();
-        return "User added";
+    @PostMapping("/addUser")
+    public String addUser(@RequestBody User user) throws ExecutionException, InterruptedException
+    {
+        return firebaseService.addUser(user);
     }
 
-//    @GetMapping("/protected")
-//    public ResponseEntity<String> protectedEndpoint(@RequestHeader("Authorization") String authHeader) {
-//        try {
-//            // Extract the token from the Authorization header (Bearer <token>)
-//            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-//                String idToken = authHeader.substring(7); // Get the token part of the header
-//                FirebaseToken decodedToken = firebaseAuthService.verifyIdToken(idToken);
-//                String uid = decodedToken.getUid(); // Get the UID of the authenticated user
-//
-//                // Proceed with the request logic (e.g., user-specific data)
-//                return ResponseEntity.ok("Hello, user with UID: " + uid);
-//            } else {
-//                return ResponseEntity.status(400).body("Invalid authorization header");
-//            }
-//        } catch (Exception e) {
-//            return ResponseEntity.status(401).body("Unauthorized: " + e.getMessage());
-//        }
-//    }
+    @GetMapping("/getUser")
+    public ResponseEntity<User> getUser(@RequestParam(required = true) String username) throws ExecutionException, InterruptedException
+    {
+        User user = firebaseService.getUser(username);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(404).body(null); // Return 404 if user is not found
+        }
+    }
+
+    @PutMapping("/updateUser")
+    public String updateUser(@RequestBody User user) throws ExecutionException, InterruptedException
+    {
+        return firebaseService.updateUser(user);
+    }
+
+    @DeleteMapping("/deleteUser")
+    public String deleteUser(@RequestParam(required = true) String username) throws ExecutionException, InterruptedException
+    {
+        return firebaseService.deleteUser(username);
+    }
+
 }

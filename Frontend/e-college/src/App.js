@@ -1,9 +1,8 @@
 import Login from "./components/auth/login";
 import Register from "./components/auth/register";
-
 import Header from "./components/header";
 import Home from "./components/home";
-
+import Dashboard from "./components/dashboard"; 
 import { AuthProvider } from "./auth_context";
 import { useRoutes } from "react-router-dom";
 
@@ -25,8 +24,14 @@ function App() {
       path: "/home",
       element: <Home />,
     },
+    {
+      path: "/dashboard",
+      element: <Dashboard />,
+    }
   ];
+
   let routesElement = useRoutes(routesArray);
+
   return (
     <AuthProvider>
       <Header />

@@ -1,12 +1,10 @@
 package com.ecampus.Ecampus.firebase.Services;
 
-import com.ecampus.Ecampus.user.User;
+import com.ecampus.Ecampus.entities.User;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.protobuf.Api;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;

@@ -5,10 +5,10 @@ import java.util.List;
 public class TransactionHistory {
 
     private String userEmail;
-    private List<Listing> transactions;
+    private List<Item> transactions;
     private TransactionType type;
 
-    public TransactionHistory(TransactionType type, List<Listing> transactions, String userEmail) {
+    public TransactionHistory(TransactionType type, List<Item> transactions, String userEmail) {
         this.type = type;
         this.transactions = transactions;
         this.userEmail = userEmail;
@@ -22,11 +22,11 @@ public class TransactionHistory {
         this.userEmail = userEmail;
     }
 
-    public List<Listing> getTransactions() {
+    public List<Item> getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(List<Listing> transactions) {
+    public void setTransactions(List<Item> transactions) {
         this.transactions = transactions;
     }
 

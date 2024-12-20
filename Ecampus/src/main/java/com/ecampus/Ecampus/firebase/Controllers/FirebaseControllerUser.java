@@ -1,8 +1,9 @@
-package com.ecampus.Ecampus.firebase;
+package com.ecampus.Ecampus.firebase.Controllers;
 
 //import com.ecampus.Ecampus.firebase.Services.FirebaseAuthService;
-import com.ecampus.Ecampus.firebase.Services.FirebaseService;
+import com.ecampus.Ecampus.firebase.Services.FirebaseServiceUser;
 import com.ecampus.Ecampus.entities.User;
+import com.ecampus.Ecampus.firebase.Services.FirebaseServiceItem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,17 +11,14 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/user")
-public class FirebaseController
+public class FirebaseControllerUser
 {
-//    @Autowired
-//    private FirebaseAuthService firebaseAuthService;
 
-    private final FirebaseService firebaseService;
+    private final FirebaseServiceUser firebaseService;
 
-    public FirebaseController(FirebaseService firebaseService)
+    public FirebaseControllerUser(FirebaseServiceUser firebaseService, FirebaseServiceItem firebaseServiceItem)
     {
         this.firebaseService = firebaseService;
-       // this.firebaseAuthService = firebaseAuthService;
     }
 
     @PostMapping("/addUser")

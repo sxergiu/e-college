@@ -10,11 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.ExecutionException;
 
 @Service
-public class FirebaseService {
+public class FirebaseServiceUser
+{
 
     private final Firestore firestore;
 
-    public FirebaseService(FirebaseApp firebaseApp) {
+    public FirebaseServiceUser(FirebaseApp firebaseApp) {
         // Ensure Firestore is initialized after FirebaseApp is configured
         this.firestore = FirestoreClient.getFirestore();
     }

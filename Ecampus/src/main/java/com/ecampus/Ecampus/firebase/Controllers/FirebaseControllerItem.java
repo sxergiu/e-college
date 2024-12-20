@@ -49,6 +49,7 @@ public class FirebaseControllerItem {
     @PutMapping("/updateItem/{id}")
     public ResponseEntity<String> updateItem(@PathVariable String id, @RequestBody Item item) throws ExecutionException, InterruptedException, FirebaseException
     {
+        item.setId(id);
         System.out.println("Received Item: " + item);
         firebaseServiceItem.updateItem(id, item);
         return ResponseEntity.ok("Item updated successfully with ID: " + id);

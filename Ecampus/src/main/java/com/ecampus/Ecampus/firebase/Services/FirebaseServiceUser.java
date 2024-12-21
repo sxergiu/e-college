@@ -26,16 +26,16 @@ public class FirebaseServiceUser
             return collectionApiFuture.get().getUpdateTime().toString();
     }
 
-    public User getUser(String documentID) throws ExecutionException, InterruptedException {
+    public User getUser(String uid) throws ExecutionException, InterruptedException {
         try {
-            DocumentReference documentReference = firestore.collection("users").document(documentID);
+            DocumentReference documentReference = firestore.collection("users").document(uid);
             ApiFuture<DocumentSnapshot> documentSnapshotApiFuture = documentReference.get();
             DocumentSnapshot documentSnapshot = documentSnapshotApiFuture.get();
 
             if (documentSnapshot.exists()) {
                 return documentSnapshot.toObject(User.class);
             } else {
-                System.out.println("User with document ID " + documentID + " does not exist.");
+                System.out.println("User with document ID " + uid + " does not exist.");
                 return null;
             }
         } catch (Exception e) {

@@ -13,6 +13,23 @@ const Login = () => {
     const [isSigningIn, setIsSigningIn] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    const sendTokenToBackend = async () => {
+        const user = auth.currentUser;
+        if (user) {
+          const idToken = await user.getIdToken();
+          try {
+            const response = await axios.get("http://localhost:8080/validate-token", {
+              headers: { Authorization: 'Bearer ${idToken}' },
+            });
+            console.log(response.data); // Handle the response from the backend
+        
+          } catch (error) {
+            console.error("Error sending token to backend:", error.message);
+          }
+        }
+      }
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isSigningIn) return; // Prevent multiple submissions
@@ -22,6 +39,10 @@ const Login = () => {
 
         try {
             await doSignInWithEmailAndPassword(email, password);
+
+            sendTokenToBackend();
+          
+
         } catch (error) {
             setIsSigningIn(false);
             if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
@@ -47,6 +68,9 @@ const Login = () => {
 
         try {
             await doSignInWithGoogle();
+
+            sendTokenToBackend();
+
         } catch (error) {
             setIsSigningIn(false);
             setErrorMessage('An error occurred during Google sign-in.');

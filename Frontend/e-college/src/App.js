@@ -3,15 +3,12 @@ import Register from "./components/auth/register";
 import Header from "./components/header";
 import Home from "./components/home";
 import Dashboard from "./components/dashboard"; 
+import MyItems from "./components/myItems";
 import { AuthProvider } from "./auth_context";
 import { useRoutes } from "react-router-dom";
 
 function App() {
   const routesArray = [
-    {
-      path: "*",
-      element: <Login />,
-    },
     {
       path: "/login",
       element: <Login />,
@@ -27,7 +24,15 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
-    }
+    },
+    {
+      path: "/my-items",
+      element: <MyItems />,
+    },
+    {
+      path: "*", // Catch-all route for undefined paths
+      element: <Login />,
+    },
   ];
 
   let routesElement = useRoutes(routesArray);

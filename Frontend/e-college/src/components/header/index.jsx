@@ -1,24 +1,24 @@
-import React, { useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../auth_context'
-import { doSignOut } from '../../firebase/auth'
-import { Home, LayoutDashboard, MessageCircle, Bell } from 'lucide-react'
+import { Home, LayoutDashboard, MessageCircle, Bell, Box } from 'lucide-react';
+import React, { useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../auth_context';
+import { doSignOut } from '../../firebase/auth';
 
 const Header = () => {
-    const navigate = useNavigate()
-    const { userLoggedIn } = useAuth()
+    const navigate = useNavigate();
+    const { userLoggedIn } = useAuth();
 
     const handleLogout = useCallback(async () => {
         try {
-            await doSignOut()
+            await doSignOut();
             // Wrap navigation in setTimeout to avoid concurrent rendering issues
             setTimeout(() => {
-                navigate('/login', { replace: true })
-            }, 0)
+                navigate('/login', { replace: true });
+            }, 0);
         } catch (error) {
-            console.error("Logout error:", error)
+            console.error("Logout error:", error);
         }
-    }, [navigate])
+    }, [navigate]);
 
     return (
         <nav className='flex flex-row justify-between w-full z-20 fixed top-0 left-0 h-12 border-b bg-gray-200 px-4'>
@@ -52,6 +52,13 @@ const Header = () => {
             <div className='flex items-center gap-x-4'>
                 {userLoggedIn ? (
                     <>
+                        <Link 
+                            to="/my-items" 
+                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-blue-600'
+                        >
+                            <Box size={18} />
+                            My Items
+                        </Link>
                         <Link 
                             to="/messages" 
                             className='text-gray-700 hover:text-blue-600'
@@ -89,7 +96,7 @@ const Header = () => {
                 )}
             </div>
         </nav>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;

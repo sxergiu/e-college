@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { Navigate, Link } from 'react-router-dom';
-import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth';
-import { useAuth } from '../../../auth_context';
+import React, { useState } from 'react'
+import { Navigate, Link } from 'react-router-dom'
+import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../firebase/auth'
+import { useAuth } from '../../../auth_context'
+import axios from "axios"
+import { auth } from "../../../firebase/firebase"  // Corrected import for auth
+
 
 const Login = () => {
     const { userLoggedIn } = useAuth();

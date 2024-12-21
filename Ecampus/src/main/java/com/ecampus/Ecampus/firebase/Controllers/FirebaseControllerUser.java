@@ -27,10 +27,10 @@ public class FirebaseControllerUser
         return firebaseService.addUser(user);
     }
 
-    @GetMapping("/getUser")
-    public ResponseEntity<User> getUser(@RequestParam(required = true) String username) throws ExecutionException, InterruptedException
+    @GetMapping("/getUser/{uid}")
+    public ResponseEntity<User> getUser(@RequestParam(required = true) String uid) throws ExecutionException, InterruptedException
     {
-        User user = firebaseService.getUser(username);
+        User user = firebaseService.getUser(uid);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {

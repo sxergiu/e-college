@@ -106,4 +106,18 @@ public class FirebaseControllerItem {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Map<String, Object>>> search(@RequestParam String q)
+    {
+        try
+        {
+            List<Map<String, Object>> searchedItems = firebaseServiceItem.searchItems(q);
+            return ResponseEntity.ok(searchedItems);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error returning searched item: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

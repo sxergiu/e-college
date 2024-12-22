@@ -4,6 +4,7 @@ import { doSignInWithEmailAndPassword, doSignInWithGoogle } from '../../../fireb
 import { useAuth } from '../../../auth_context'
 import axios from "axios"
 import { auth } from "../../../firebase/firebase"
+import { sendUserIdToBackend } from "../../userid"
 
 const Login = () => {
     const { userLoggedIn } = useAuth();
@@ -21,7 +22,7 @@ const Login = () => {
             }
 
             const idToken = await user.getIdToken();
-            const response = await axios.get("http://localhost:8080/validate-token", {
+            const response = await axios.get("http://localhost:8080/user/validate-token", {
                 headers: { 
                     Authorization: `Bearer ${idToken}`,  // Fixed template literal syntax
                     'Content-Type': 'application/json'
@@ -45,6 +46,7 @@ const Login = () => {
         try {
             await doSignInWithEmailAndPassword(email, password);
             await sendTokenToBackend();
+            await sendUserIdToBackend();
         } catch (error) {
             let errorMsg = 'An error occurred during sign-in.';
             

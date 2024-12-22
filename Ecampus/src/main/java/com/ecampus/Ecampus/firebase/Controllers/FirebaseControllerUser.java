@@ -16,7 +16,7 @@ public class FirebaseControllerUser
 
     private final FirebaseServiceUser firebaseService;
 
-    public FirebaseControllerUser(FirebaseServiceUser firebaseService, FirebaseServiceItem firebaseServiceItem)
+    public FirebaseControllerUser(FirebaseServiceUser firebaseService, FirebaseServiceItem firebaseServiceItem, FirebaseServiceUser firebaseServiceUser)
     {
         this.firebaseService = firebaseService;
     }

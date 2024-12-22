@@ -1,1 +1,4 @@
-getItemsByUser in Service lucreaza cu endpoint getItemsByUser "/getUserItems/{userId}" din controller. in react se face fetch in MyItems. va trebui sa vedem cum legam si la partea de add item, unde am adaugat un formular.
+Backend: Controller ul de autentificare are injectate servicii de user si de item. Cele 2 servicii au la randul lor fiecare cat un atribut user care retine pe tot parcursul login u lui unui user pe pagina web datele acestuia, cel mai
+important UID ul.Bazat pe asta am facut o conditie de a nu lua itemele cu sellerId == loggedUser.id in query ul de returnare a tuturor itemelor folosit pt dashboard.
+Frontend: Bara de search implementata in dashboard.Cautarea nu se face pt match 1 to 1 ci orice contine bucati din categoria unui item sau din nume.Ma gandeam in timp ce iti scriam descria la ce am lucrat ca bara de search foarte posibil
+sa nu tina cont de user ul logat si sa returneze iteme ce apartin lui.

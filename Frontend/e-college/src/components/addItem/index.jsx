@@ -179,20 +179,20 @@ const AddItem = () => {
                 {error && <p className="text-red-600">{error}</p>}
                 {successMessage && <p className="text-green-600">{successMessage}</p>}
                 <div className="flex justify-end gap-20">
-    <button
-        type="submit"
-        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-        disabled={isSubmitting}
-    >
-        {isSubmitting ? 'Adding...' : 'Add Item'}
-    </button>
-    <button
-        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-        onClick={() => navigate('/my-items')} // Go back to My Items
-    >
-        Go Back
-    </button>
-</div>
+            <button
+                type="submit"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? 'Adding...' : 'Add Item'}
+            </button>
+            <button
+                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                onClick={() => navigate('/my-items')} // Go back to My Items
+            >
+                Go Back
+            </button>
+        </div>
 
             </form>
         </div>

@@ -10,8 +10,7 @@ import com.google.firebase.FirebaseException;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -195,78 +194,173 @@ public class FirebaseServiceItem {
         }
     }
 
-    public List<Item> getItemsByUser(String userId) throws ExecutionException, InterruptedException {
+
+    public List<Item> getItemsBySellerId(String userId) throws FirebaseException, ExecutionException, InterruptedException {
+        List<Item> items = new ArrayList<>();
+
         try {
-            // Query items collection where sellerId matches the given userId
-            ApiFuture<QuerySnapshot> future = firestore.collection("items")
-                    .whereEqualTo("sellerId", userId)
-                    .get();
+            // Query the Firestore collection for documents where "sellerId" matches the provided userId
+            CollectionReference collectionReference = firestore.collection("items");
+            Query query = collectionReference.whereEqualTo("sellerId", userId);
+            ApiFuture<QuerySnapshot> querySnapshotApiFuture = query.get();
+            QuerySnapshot querySnapshot = querySnapshotApiFuture.get();
 
-            // Get query results
-            QuerySnapshot querySnapshot = future.get();
-            List<Item> userItems = new ArrayList<>();
+            if (!querySnapshot.isEmpty()) {
+                for (DocumentSnapshot documentSnapshot : querySnapshot.getDocuments()) {
+                    System.out.println("Retrieved document data: " + documentSnapshot.getData());
 
-            // Iterate through documents and convert to Item objects
-            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                if (document.exists()) {
+                    // Create the Item object
                     Item item = new Item();
-                    item.setId(document.getId());
+                    item.setId(documentSnapshot.getId());
 
-                    // Map fields from document to Item object
-                    if (document.contains("sellerId")) {
-                        item.setSellerId(document.getString("sellerId"));
+                    // Check and set sellerId (String)
+                    if (documentSnapshot.contains("sellerId")) {
+                        Object sellerId = documentSnapshot.get("sellerId");
+                        if (sellerId instanceof String) {
+                            item.setSellerId((String) sellerId);
+                        } else {
+                            System.err.println("Invalid type for sellerId");
+                        }
                     }
-                    if (document.contains("name")) {
-                        item.setName(document.getString("name"));
+
+                    // Check and set name (String)
+                    if (documentSnapshot.contains("name")) {
+                        Object name = documentSnapshot.get("name");
+                        if (name instanceof String) {
+                            item.setName((String) name);
+                        } else {
+                            System.err.println("Invalid type for name");
+                        }
                     }
-                    if (document.contains("description")) {
-                        item.setDescription(document.getString("description"));
+
+                    // Check and set description (String)
+                    if (documentSnapshot.contains("description")) {
+                        Object description = documentSnapshot.get("description");
+                        if (description instanceof String) {
+                            item.setDescription((String) description);
+                        } else {
+                            System.err.println("Invalid type for description");
+                        }
                     }
-                    if (document.contains("price")) {
-                        Object price = document.get("price");
+
+                    // Check and set price (Double)
+                    if (documentSnapshot.contains("price")) {
+                        Object price = documentSnapshot.get("price");
                         if (price instanceof Double) {
                             item.setPrice((Double) price);
                         } else if (price instanceof Long) {
                             item.setPrice(((Long) price).doubleValue());
+                        } else {
+                            System.err.println("Invalid type for price");
                         }
                     }
-                    if (document.contains("category")) {
-                        item.setCategory(document.getString("category"));
+
+                    // Check and set category (ItemCategory)
+                    if (documentSnapshot.contains("category")) {
+                        Object category = documentSnapshot.get("category");
+                        if (category instanceof String) {
+                            item.setCategory((String) category); // Converts string to ItemCategory
+                        } else {
+                            System.err.println("Invalid type for category");
+                        }
                     }
-                    if (document.contains("images")) {
-                        Object images = document.get("images");
+
+                    // Check and set images (List<String>)
+                    if (documentSnapshot.contains("images")) {
+                        Object images = documentSnapshot.get("images");
                         if (images instanceof List) {
                             List<?> imagesList = (List<?>) images;
-                            if (!imagesList.isEmpty() && imagesList.get(0) instanceof String) {
+                            // Check that the list contains only Strings
+                            if (imagesList.isEmpty() || imagesList.get(0) instanceof String) {
                                 item.setImages((List<String>) images);
+                            } else {
+                                System.err.println("Invalid type for images");
                             }
-                        }
-                    }
-                    if (document.contains("condition")) {
-                        item.setCondition(document.getString("condition"));
-                    }
-                    if (document.contains("createdAt")) {
-                        Timestamp createdAt = document.getTimestamp("createdAt");
-                        if (createdAt != null) {
-                            item.setCreatedAt(createdAt.toSqlTimestamp());
-                        }
-                    }
-                    if (document.contains("updatedAt")) {
-                        Timestamp updatedAt = document.getTimestamp("updatedAt");
-                        if (updatedAt != null) {
-                            item.setUpdatedAt(updatedAt.toSqlTimestamp());
+                        } else {
+                            System.err.println("Invalid type for images");
                         }
                     }
 
-                    userItems.add(item);
+                    // Check and set condition (ItemCondition)
+                    if (documentSnapshot.contains("condition")) {
+                        Object condition = documentSnapshot.get("condition");
+                        if (condition instanceof String) {
+                            item.setCondition((String) condition); // Converts string to ItemCondition
+                        } else {
+                            System.err.println("Invalid type for condition");
+                        }
+                    }
+
+                    // Check and set createdAt (Timestamp)
+                    if (documentSnapshot.contains("createdAt")) {
+                        Object createdAt = documentSnapshot.get("createdAt");
+                        if (createdAt instanceof Timestamp) {
+                            item.setCreatedAt(((Timestamp) createdAt).toSqlTimestamp());
+                        } else {
+                            System.err.println("Invalid type for createdAt");
+                        }
+                    }
+
+                    // Check and set updatedAt (Timestamp)
+                    if (documentSnapshot.contains("updatedAt")) {
+                        Object updatedAt = documentSnapshot.get("updatedAt");
+                        if (updatedAt instanceof Timestamp) {
+                            item.setUpdatedAt(((Timestamp) updatedAt).toSqlTimestamp());
+                        } else {
+                            System.err.println("Invalid type for updatedAt");
+                        }
+                    }
+
+                    // Add the item to the list
+                    items.add(item);
                 }
+            } else {
+                System.out.println("No items found for sellerId: " + userId);
             }
 
-            return userItems;
         } catch (Exception e) {
-            System.err.println("Error fetching items for user: " + e.getMessage());
+            System.err.println("Error fetching items: " + e.getMessage());
             throw e;
         }
+
+        return items;
     }
+
+    public Map<String, List<Item>> returnAllItems() throws FirebaseException, ExecutionException, InterruptedException {
+        Map<String, List<Item>> userItemsMap = new HashMap<>();
+
+        try {
+            // Fetch all users from the "users" collection
+            CollectionReference usersCollection = firestore.collection("users");
+            ApiFuture<QuerySnapshot> usersFuture = usersCollection.get();
+            QuerySnapshot usersSnapshot = usersFuture.get();
+
+            // Iterate over each user document
+            for (DocumentSnapshot userDoc : usersSnapshot.getDocuments()) {
+                if (userDoc.exists()) {
+                    String userId = userDoc.getId(); // Assuming userId is the document ID
+
+                    String username = userDoc.contains("username") ? userDoc.getString("username") : "Unknown";
+                    // Fetch items for this user using getItemBySellerId
+                    List<Item> items = getItemsBySellerId(userId);
+
+                    // Add to the map, even if the user has no items (empty list)
+                    if (items.isEmpty())
+                    {
+                        System.out.println("No items found for sellerId: " + userId);
+                    }
+                    else
+                        userItemsMap.put(username, items);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching all items: " + e.getMessage());
+            throw e;
+        }
+
+        return userItemsMap;
+    }
+
+
 
 }

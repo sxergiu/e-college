@@ -11,6 +11,8 @@ import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -66,6 +68,25 @@ public class FirebaseControllerItem {
         else
         {
             return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/getItemBySellerId/{id}")
+    public ResponseEntity<List<Item>> getItemBySellerId(@PathVariable String id) throws FirebaseException, ExecutionException, InterruptedException
+    {
+        try
+        {
+            List<Item> items = items = firebaseServiceItem.getItemsBySellerId(id);
+            if (items.isEmpty())
+            {
+                return ResponseEntity.ok(items);
+            }
+            return ResponseEntity.ok(items);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error fetching items by seller ID: " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth_context';
 import { auth } from '../../firebase/firebase';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import ItemCard from '../itemCard';
 
 const MyItems = () => {
+    const navigate = useNavigate(); // Initialize navigate
     const currentUser = auth.currentUser;
     const { userLoggedIn } = useAuth();
     const [items, setItems] = useState([]);
@@ -61,10 +63,7 @@ const MyItems = () => {
                     </p>
                     <button 
                         className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                        onClick={() => {
-                            // Add navigation to create item page
-                            // Example: navigate('/items/new');
-                        }}
+                        onClick={() => navigate('/my-items/add-item')} // Navigate to item upload page
                     >
                         List New Item
                     </button>

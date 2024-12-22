@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth_context';
 import { auth } from '../../firebase/firebase';
-import ItemCard from '../itemCard';  // Adjust path as needed
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import ItemCard from '../itemCard';
 
 const MyItems = () => {
+    const navigate = useNavigate(); // Initialize navigate
     const currentUser = auth.currentUser;
     const { userLoggedIn } = useAuth();
     const [items, setItems] = useState([]);
@@ -13,46 +15,23 @@ const MyItems = () => {
     useEffect(() => {
         const fetchUserItems = async () => {
             if (!currentUser?.uid) return;
-            
+
             setIsLoading(true);
             setError(null);
-            
+
             try {
-                // Replace this with your actual API call
-                // Example:
-                // const response = await fetch(`/api/items?sellerId=${currentUser.uid}`);
-                // const data = await response.json();
-                // setItems(data);
+                const response = await fetch(`http://localhost:8080/item/getUserItems/${currentUser.uid}`);
 
-                // Temporary mock data
-                const mockUserItems = [
-                    {
-                        id: "1",
-                        sellerId: currentUser.uid,
-                        name: "Textbook - Introduction to Computer Science",
-                        description: "Excellent condition, barely used. Perfect for first-year CS students.",
-                        price: 45.99,
-                        images: ["https://cdn.contentspeed.ro/0786083661.websales.ro/cs-content/cs-photos/products/original/cutit-lat-in-stil-chinezesc-lungime-lama-33-cm_9195_3_16221111325451.jpg",],
-                        isSold: false,
-                        condition: "LIKE_NEW",
-                        category: "BOOKS",
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        id: "2",
-                        sellerId: currentUser.uid,
-                        name: "Scientific Calculator",
-                        description: "TI-84 Plus, perfect for calculus and statistics classes",
-                        price: 75.00,
-                        images: ["https://cdn.contentspeed.ro/0786083661.websales.ro/cs-content/cs-photos/products/original/cutit-lat-in-stil-chinezesc-lungime-lama-33-cm_9195_3_16221111325451.jpg",],
-                        isSold: true,
-                        condition: "USED",
-                        category: "ELECTRONICS",
-                        createdAt: new Date().toISOString()
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        setItems([]);
+                        return;
                     }
-                ];
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-                setItems(mockUserItems);
+                const data = await response.json();
+                setItems(data);
             } catch (err) {
                 setError('Failed to fetch your items. Please try again later.');
                 console.error('Error fetching user items:', err);
@@ -77,17 +56,14 @@ const MyItems = () => {
     return (
         <div className="pt-16 px-4 max-w-7xl mx-auto">
             <div className="mb-6">
-                <h1 className="text-2xl font-bold mb-2">My Items</h1>
-                <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold mb-4">My Items</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <p className="text-gray-600">
                         {items.length} item{items.length !== 1 ? 's' : ''} listed
                     </p>
                     <button 
                         className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                        onClick={() => {
-                            // Add navigation to create item page
-                            // Example: navigate('/items/new');
-                        }}
+                        onClick={() => navigate('/my-items/add-item')} // Navigate to item upload page
                     >
                         List New Item
                     </button>
@@ -105,15 +81,6 @@ const MyItems = () => {
             ) : items.length === 0 ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <p className="text-gray-600 mb-4">You haven't listed any items yet</p>
-                    <button 
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                        onClick={() => {
-                            // Add navigation to create item page
-                            // Example: navigate('/items/new');
-                        }}
-                    >
-                        List Your First Item
-                    </button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

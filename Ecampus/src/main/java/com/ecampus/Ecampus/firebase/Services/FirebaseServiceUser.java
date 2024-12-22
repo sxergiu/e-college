@@ -14,10 +14,21 @@ public class FirebaseServiceUser
 {
 
     private final Firestore firestore;
+    private User loggedUser;
 
     public FirebaseServiceUser(FirebaseApp firebaseApp) {
         // Ensure Firestore is initialized after FirebaseApp is configured
         this.firestore = FirestoreClient.getFirestore();
+    }
+
+    public User getLoggedUser()
+    {
+        return loggedUser;
+    }
+
+    public void setLoggedUser(User loggedUser)
+    {
+        this.loggedUser = loggedUser;
     }
 
     public String addUser(User user) throws ExecutionException, InterruptedException

@@ -12,11 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 public class FirebaseServiceItem {
 
     private final Firestore firestore;
+    private User loggedUser;
 
     public FirebaseServiceItem(FirebaseApp firebaseApp)
     {
@@ -26,6 +28,13 @@ public class FirebaseServiceItem {
         this.firestore = FirestoreClient.getFirestore();
     }
 
+    public void setLoggedUser(User user) {
+        this.loggedUser = user;
+    }
+
+    public User getLoggedUser() {
+        return this.loggedUser;
+    }
 
     public String addItem(Item item) throws ExecutionException, InterruptedException {
         try {
@@ -315,7 +324,7 @@ public class FirebaseServiceItem {
                     items.add(item);
                 }
             } else {
-                System.out.println("No items found for sellerId: " + userId);
+                //System.out.println("No items found for sellerId: " + userId);
             }
 
         } catch (Exception e) {
@@ -328,7 +337,7 @@ public class FirebaseServiceItem {
 
     public Map<String, List<Item>> returnAllItems() throws FirebaseException, ExecutionException, InterruptedException {
         Map<String, List<Item>> userItemsMap = new HashMap<>();
-
+        System.out.println("FirbaseServiceItem::returnAllItems" + loggedUser.getStudentId());
         try {
             // Fetch all users from the "users" collection
             CollectionReference usersCollection = firestore.collection("users");
@@ -340,17 +349,18 @@ public class FirebaseServiceItem {
                 if (userDoc.exists()) {
                     String userId = userDoc.getId(); // Assuming userId is the document ID
 
-                    String username = userDoc.contains("username") ? userDoc.getString("username") : "Unknown";
-                    // Fetch items for this user using getItemBySellerId
-                    List<Item> items = getItemsBySellerId(userId);
-
-                    // Add to the map, even if the user has no items (empty list)
-                    if (items.isEmpty())
+                    if (!userId.equals(this.loggedUser.getStudentId()))
                     {
-                        System.out.println("No items found for sellerId: " + userId);
+                        String username = userDoc.contains("username") ? userDoc.getString("username") : "Unknown";
+                        // Fetch items for this user using getItemBySellerId
+                        List<Item> items = getItemsBySellerId(userId);
+                        // Add to the map, even if the user has no items (empty list)
+                        if (items.isEmpty())
+                        {
+                            //System.out.println("No items found for sellerId: " + userId);
+                        } else
+                            userItemsMap.put(username, items);
                     }
-                    else
-                        userItemsMap.put(username, items);
                 }
             }
         } catch (Exception e) {
@@ -361,6 +371,35 @@ public class FirebaseServiceItem {
         return userItemsMap;
     }
 
+    public List<Map<String, Object>> searchItems(String q) throws Exception
+    {
+        // Initialize Firestore Collection reference
+        CollectionReference itemsRef = firestore.collection("items");
+
+        // Query Firestore to find items where name, description, or category contains the search query (case insensitive)
+        ApiFuture<QuerySnapshot> future = itemsRef.get();
+
+        // Get the results as a List of DocumentSnapshots
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        // Convert Firestore documents to a list of items
+        List<Map<String, Object>> matchedItems = documents.stream()
+                .map(doc -> doc.getData())
+                .filter(item -> {
+                    // Perform case-insensitive substring matching on name, description, and category
+                    String name = (String) item.get("name");
+                    String description = (String) item.get("description");
+                    String category = (String) item.get("category");
+
+                    // Check if query is found in any of the fields
+                    return (name != null && name.toLowerCase().contains(q.toLowerCase())) ||
+                            (description != null && description.toLowerCase().contains(q.toLowerCase())) ||
+                            (category != null && category.toLowerCase().contains(q.toLowerCase()));
+                })
+                .collect(Collectors.toList());
+
+        return matchedItems;  // Return matched items
+    }
 
 
 }

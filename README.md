@@ -1,1 +1,1 @@
-getItemsByUser in Service lucreaza cu endpoint getItemsByUser "/getUserItems/{userId}" din controller. in react se face fetch in MyItems. va trebui sa vedem cum legam si la partea de add item, unde am adaugat un formular.
+Din nou nu ti ai luat mainu si ai lucrat peste ce aveai tu. Te rog frumos instaleaza gitkraken. Frontu suna endpointu gresit pe myitems din nou. asta e o problema minora dar pe viitor putem intra in belele mari. in rest keep up the good work and have fun

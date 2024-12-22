@@ -10,9 +10,7 @@ import com.google.firebase.FirebaseException;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -327,6 +325,42 @@ public class FirebaseServiceItem {
 
         return items;
     }
+
+    public Map<String, List<Item>> returnAllItems() throws FirebaseException, ExecutionException, InterruptedException {
+        Map<String, List<Item>> userItemsMap = new HashMap<>();
+
+        try {
+            // Fetch all users from the "users" collection
+            CollectionReference usersCollection = firestore.collection("users");
+            ApiFuture<QuerySnapshot> usersFuture = usersCollection.get();
+            QuerySnapshot usersSnapshot = usersFuture.get();
+
+            // Iterate over each user document
+            for (DocumentSnapshot userDoc : usersSnapshot.getDocuments()) {
+                if (userDoc.exists()) {
+                    String userId = userDoc.getId(); // Assuming userId is the document ID
+
+                    String username = userDoc.contains("username") ? userDoc.getString("username") : "Unknown";
+                    // Fetch items for this user using getItemBySellerId
+                    List<Item> items = getItemsBySellerId(userId);
+
+                    // Add to the map, even if the user has no items (empty list)
+                    if (items.isEmpty())
+                    {
+                        System.out.println("No items found for sellerId: " + userId);
+                    }
+                    else
+                        userItemsMap.put(username, items);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching all items: " + e.getMessage());
+            throw e;
+        }
+
+        return userItemsMap;
+    }
+
 
 
 }

@@ -4,15 +4,13 @@ import com.ecampus.Ecampus.entities.Item;
 import com.ecampus.Ecampus.entities.User;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -196,4 +194,79 @@ public class FirebaseServiceItem {
             return "Item with id: " + documentID + " not found in the database.";
         }
     }
+
+    public List<Item> getItemsByUser(String userId) throws ExecutionException, InterruptedException {
+        try {
+            // Query items collection where sellerId matches the given userId
+            ApiFuture<QuerySnapshot> future = firestore.collection("items")
+                    .whereEqualTo("sellerId", userId)
+                    .get();
+
+            // Get query results
+            QuerySnapshot querySnapshot = future.get();
+            List<Item> userItems = new ArrayList<>();
+
+            // Iterate through documents and convert to Item objects
+            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                if (document.exists()) {
+                    Item item = new Item();
+                    item.setId(document.getId());
+
+                    // Map fields from document to Item object
+                    if (document.contains("sellerId")) {
+                        item.setSellerId(document.getString("sellerId"));
+                    }
+                    if (document.contains("name")) {
+                        item.setName(document.getString("name"));
+                    }
+                    if (document.contains("description")) {
+                        item.setDescription(document.getString("description"));
+                    }
+                    if (document.contains("price")) {
+                        Object price = document.get("price");
+                        if (price instanceof Double) {
+                            item.setPrice((Double) price);
+                        } else if (price instanceof Long) {
+                            item.setPrice(((Long) price).doubleValue());
+                        }
+                    }
+                    if (document.contains("category")) {
+                        item.setCategory(document.getString("category"));
+                    }
+                    if (document.contains("images")) {
+                        Object images = document.get("images");
+                        if (images instanceof List) {
+                            List<?> imagesList = (List<?>) images;
+                            if (!imagesList.isEmpty() && imagesList.get(0) instanceof String) {
+                                item.setImages((List<String>) images);
+                            }
+                        }
+                    }
+                    if (document.contains("condition")) {
+                        item.setCondition(document.getString("condition"));
+                    }
+                    if (document.contains("createdAt")) {
+                        Timestamp createdAt = document.getTimestamp("createdAt");
+                        if (createdAt != null) {
+                            item.setCreatedAt(createdAt.toSqlTimestamp());
+                        }
+                    }
+                    if (document.contains("updatedAt")) {
+                        Timestamp updatedAt = document.getTimestamp("updatedAt");
+                        if (updatedAt != null) {
+                            item.setUpdatedAt(updatedAt.toSqlTimestamp());
+                        }
+                    }
+
+                    userItems.add(item);
+                }
+            }
+
+            return userItems;
+        } catch (Exception e) {
+            System.err.println("Error fetching items for user: " + e.getMessage());
+            throw e;
+        }
+    }
+
 }

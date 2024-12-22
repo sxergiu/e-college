@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../auth_context';
 import { auth } from '../../firebase/firebase';
-import ItemCard from '../itemCard';  // Adjust path as needed
+import ItemCard from '../itemCard';
 
 const MyItems = () => {
     const currentUser = auth.currentUser;
@@ -18,41 +18,20 @@ const MyItems = () => {
             setError(null);
             
             try {
-                // Replace this with your actual API call
-                // Example:
-                // const response = await fetch(`/api/items?sellerId=${currentUser.uid}`);
-                // const data = await response.json();
-                // setItems(data);
-
-                // Temporary mock data
-                const mockUserItems = [
-                    {
-                        id: "1",
-                        sellerId: currentUser.uid,
-                        name: "Textbook - Introduction to Computer Science",
-                        description: "Excellent condition, barely used. Perfect for first-year CS students.",
-                        price: 45.99,
-                        images: ["https://cdn.contentspeed.ro/0786083661.websales.ro/cs-content/cs-photos/products/original/cutit-lat-in-stil-chinezesc-lungime-lama-33-cm_9195_3_16221111325451.jpg",],
-                        isSold: false,
-                        condition: "LIKE_NEW",
-                        category: "BOOKS",
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        id: "2",
-                        sellerId: currentUser.uid,
-                        name: "Scientific Calculator",
-                        description: "TI-84 Plus, perfect for calculus and statistics classes",
-                        price: 75.00,
-                        images: ["https://cdn.contentspeed.ro/0786083661.websales.ro/cs-content/cs-photos/products/original/cutit-lat-in-stil-chinezesc-lungime-lama-33-cm_9195_3_16221111325451.jpg",],
-                        isSold: true,
-                        condition: "USED",
-                        category: "ELECTRONICS",
-                        createdAt: new Date().toISOString()
+                const response = await fetch(`http://localhost:8080/item/getUserItems/${currentUser.uid}`);
+                
+                if (!response.ok) {
+                    // If response is not 2xx, throw an error
+                    if (response.status === 404) {
+                        // No items found - set empty array
+                        setItems([]);
+                        return;
                     }
-                ];
-
-                setItems(mockUserItems);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                setItems(data);
             } catch (err) {
                 setError('Failed to fetch your items. Please try again later.');
                 console.error('Error fetching user items:', err);

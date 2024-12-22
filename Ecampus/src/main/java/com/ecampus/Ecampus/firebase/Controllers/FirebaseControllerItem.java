@@ -9,6 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Collections;
+import org.springframework.util.CollectionUtils;
+
 
 import javax.validation.Valid;
 import java.util.concurrent.ExecutionException;
@@ -68,4 +72,25 @@ public class FirebaseControllerItem {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
     }
+
+    @GetMapping("/getUserItems/{userId}")
+    public ResponseEntity<?> getItemsByUser(@PathVariable String userId) {
+
+        try {
+            List<Item> items = firebaseServiceItem.getItemsByUser(userId);
+            if (items.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("No items found for user with ID: " + userId);
+            }
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            logger.error("Failed to fetch items for user: " + userId, e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch items: " + e.getMessage());
+        }
+    }
+
+
 }

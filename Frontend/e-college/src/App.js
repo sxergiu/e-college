@@ -6,6 +6,7 @@ import Dashboard from "./components/dashboard";
 import MyItems from "./components/myItems";
 import { AuthProvider } from "./auth_context";
 import { useRoutes } from "react-router-dom";
+import AddItem from "./components/addItem";
 
 function App() {
   const routesArray = [
@@ -28,6 +29,10 @@ function App() {
     {
       path: "/my-items",
       element: <MyItems />,
+    },
+    {
+      path: "/my-items/add-item",
+      element: <AddItem />
     },
     {
       path: "*", // Catch-all route for undefined paths

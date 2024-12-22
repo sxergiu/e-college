@@ -9,10 +9,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Collections;
+import org.springframework.util.CollectionUtils;
+
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -71,22 +73,24 @@ public class FirebaseControllerItem {
         }
     }
 
-    @GetMapping("/getItemBySellerId/{id}")
-    public ResponseEntity<List<Item>> getItemBySellerId(@PathVariable String id) throws FirebaseException, ExecutionException, InterruptedException
-    {
-        try
-        {
-            List<Item> items = items = firebaseServiceItem.getItemsBySellerId(id);
-            if (items.isEmpty())
-            {
-                return ResponseEntity.ok(items);
+    @GetMapping("/getUserItems/{userId}")
+    public ResponseEntity<?> getItemsByUser(@PathVariable String userId) {
+
+        try {
+            List<Item> items = firebaseServiceItem.getItemsByUser(userId);
+            if (items.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("No items found for user with ID: " + userId);
             }
             return ResponseEntity.ok(items);
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error fetching items by seller ID: " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            logger.error("Failed to fetch items for user: " + userId, e);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to fetch items: " + e.getMessage());
         }
     }
+
+
 }

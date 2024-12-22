@@ -1,2 +1,1 @@
-Database ul de la autentificare este conectat la firestore.Maparea este intre uid user de la autentificare la uid user de la colectia users.Am adaugat un camp de username cand te loghezi, daca iti faci cont cu gmail ai by default username u
-ce vine inainte de @ in adresa de mail.
+getItemsByUser in Service lucreaza cu endpoint getItemsByUser "/getUserItems/{userId}" din controller. in react se face fetch in MyItems. va trebui sa vedem cum legam si la partea de add item, unde am adaugat un formular.

@@ -20,7 +20,7 @@ const MyItems = () => {
             setError(null);
 
             try {
-                const response = await fetch(`http://localhost:8080/item/getUserItems/${currentUser.uid}`);
+                const response = await fetch(`http://localhost:8080/item/getItemBySellerId/${currentUser.uid}`);
 
                 if (!response.ok) {
                     if (response.status === 404) {

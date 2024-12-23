@@ -77,12 +77,21 @@ const Home = () => {
         displayName: profileData.name,
         photoURL: profileData.image,
       });
-      const response = await fetch(`/api/updateUserById/${currentUser.uid}`, {
-        method: 'POST',
+      
+      const response = await fetch(`http://localhost:8080/user/updateUser/${currentUser.uid}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify({
+          name: profileData.name,
+          phone: profileData.phone,
+          address: profileData.address,
+          university: profileData.university,
+          profilePicture: profileData.image
+        }),
       });
+
       if (!response.ok) throw new Error('Failed to update profile data');
+      
       setIsEditing(false);
       setIsDataChanged(false);
       alert('Profile updated successfully');
@@ -137,7 +146,7 @@ const Home = () => {
               </button>
               <button
                 className={`px-4 py-2 rounded-lg ${
-                  !isDataChanged ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  !isDataChanged ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
                 } text-white`}
                 disabled={!isDataChanged}
                 onClick={handleSave}
@@ -149,7 +158,7 @@ const Home = () => {
 
           {!isEditing && (
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
               onClick={() => setIsEditing(true)}
             >
               Edit Profile
@@ -291,7 +300,7 @@ const Home = () => {
             </p>
 
             <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
               onClick={() => alert('Add funds feature not implemented yet')}
             >
               Add Funds

@@ -28,7 +28,7 @@ public class FirebaseControllerUser
     }
 
     @GetMapping("/getUser/{uid}")
-    public ResponseEntity<User> getUser(@RequestParam(required = true) String uid) throws ExecutionException, InterruptedException
+    public ResponseEntity<User> getUser(@PathVariable String uid) throws ExecutionException, InterruptedException
     {
         User user = firebaseService.getUser(uid);
         if (user != null) {

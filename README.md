@@ -1,1 +1,6 @@
-Din nou nu ti ai luat mainu si ai lucrat peste ce aveai tu. Te rog frumos instaleaza gitkraken. Frontu suna endpointu gresit pe myitems din nou. asta e o problema minora dar pe viitor putem intra in belele mari. in rest keep up the good work and have fun
+revenim in forta, merge edit profile fara poza de profil aia se poate face mai tarziu daca chiar
+cu un bucket in firebase pe flow de patch cu astea deja implementate
+ar trebui reorganizat tot proiectu ca e vacarm si pe front si pe back
+logica de funding, rating, chating notification is prioritate
+trebuie sa intre moha pe proiect inshallah
+la multi ani si un an nou fericit 

@@ -9,19 +9,22 @@ public class User
     private String email;
     private String profilePicture;
     private String studentId;
+    private String phone;
+    private String address;
     private String university;
     private String bio;
     private String username;
-    private Double balance;
+    private Double balance = 0.0;
     private Integer rating;
     private Integer numRatings;
     //private List<Listing> userListings = new ArrayList<>();
     //private List<Listing> userWishlist = new ArrayList<>();
 
+
     public User()
     {}
 
-    public User(String name, String email, String profilePicture, String studentId, String university, String bio, String username, double balance, Integer rating, Integer numRatings)
+    public User(String name, String email, String profilePicture, String studentId, String university, String bio, String username, double balance, Integer rating, Integer numRatings, String phone)
     {
         this.name = name;
         this.email = email;
@@ -33,6 +36,7 @@ public class User
         this.balance = balance;
         this.rating = rating;
         this.numRatings = numRatings;
+        this.phone = phone;
     }
 
     public String getName()
@@ -133,5 +137,26 @@ public class User
     public void setNumRatings(Integer numRatings)
     {
         this.numRatings = numRatings;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "User [name=" + name + ", email=" + email + "]";
     }
 }

@@ -6,7 +6,9 @@ import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -78,6 +80,58 @@ public class FirebaseServiceUser
         } else {
             // If the document does not exist, return a not-found message
             return "User with username: " + documentID + " not found in the database.";
+        }
+    }
+
+    public String updateUserProfile(String uid,
+                                    String name,
+                                    String university,
+                                    String phone,
+                                    String address ) throws ExecutionException, InterruptedException, IOException {
+
+        System.out.println("Updating user profile: " + uid);
+        System.out.println("Name: " + name);
+        System.out.println("University: " + university);
+        System.out.println("Phone: " + phone);
+        System.out.println("Address: " + address);
+
+        try {
+            // First, get the existing user document
+            DocumentReference userRef = firestore.collection("users").document(uid);
+            ApiFuture<DocumentSnapshot> future = userRef.get();
+            DocumentSnapshot document = future.get();
+
+            if (!document.exists()) {
+                throw new IllegalArgumentException("User not found with uid: " + uid);
+            }
+
+            // Convert document to User object
+            User existingUser = document.toObject(User.class);
+            if (existingUser == null) {
+                throw new IllegalStateException("Failed to convert document to User object");
+            }
+
+            // Update only the fields that are provided (not null)
+            if (name != null) existingUser.setName(name);
+            if (university != null) existingUser.setUniversity(university);
+            if (phone != null) existingUser.setPhone(phone);
+            if (address != null) existingUser.setAddress(address);
+
+            System.out.println(existingUser + " PHONE: " + phone);
+
+//            // Handle profile image upload if provided
+//            if (profileImage != null && !profileImage.isEmpty()) {
+//                String profileImageUrl = uploadProfileImage(profileImage, username);
+//                existingUser.setProfileImageUrl(profileImageUrl);
+//            }
+
+            // Update the document in Firestore
+            ApiFuture<WriteResult> updateFuture = userRef.set(existingUser);
+            return updateFuture.get().getUpdateTime().toString();
+
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error updating user profile: " + e.getMessage());
+            throw e;
         }
     }
 

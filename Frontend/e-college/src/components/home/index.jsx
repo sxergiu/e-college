@@ -78,15 +78,14 @@ const Home = () => {
         photoURL: profileData.image,
       });
       
-      const response = await fetch(`http://localhost:8080/user/updateUser/${currentUser.uid}`, {
-        method: 'PUT',
+      const response = await fetch(`http://localhost:8080/user/editProfile/${currentUser.uid}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profileData.name,
-          phone: profileData.phone,
-          address: profileData.address,
           university: profileData.university,
-          profilePicture: profileData.image
+          phone: profileData.phone,
+          address: profileData.address
         }),
       });
 
@@ -300,8 +299,11 @@ const Home = () => {
             </p>
 
             <button
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className={`px-4 py-2 rounded-lg ${
+                isEditing ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+              } text-white`}
               onClick={() => alert('Add funds feature not implemented yet')}
+              disabled={isEditing}
             >
               Add Funds
             </button>

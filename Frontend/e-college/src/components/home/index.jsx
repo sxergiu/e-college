@@ -73,33 +73,37 @@ const Home = () => {
 
   const handleSave = useCallback(async () => {
     try {
-      await currentUser.updateProfile({
-        displayName: profileData.name,
-        photoURL: profileData.image,
-      });
-      
+  
+      // Send the request to the backend
       const response = await fetch(`http://localhost:8080/user/editProfile/${currentUser.uid}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profileData.name,
           university: profileData.university,
-          phone: profileData.phone,
-          address: profileData.address
+          phone: profileData.phone, // Ensure key matches the backend
+          address: profileData.address,
         }),
       });
+  
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+  
+      // Handle success (e.g., show a success message)
+      alert('Profile updated successfully!');
 
-      if (!response.ok) throw new Error('Failed to update profile data');
-      
-      setIsEditing(false);
-      setIsDataChanged(false);
-      alert('Profile updated successfully');
+     // await fetchUserData();
+      setIsEditing(false); // Optionally close the editing mode
+
     } catch (error) {
+      // Handle error (e.g., show an error message)
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      alert(`Failed to update profile: ${error.message}`);
     }
-  }, [currentUser, profileData]);
-
+  }, [profileData, currentUser]);
+  
   const handleCancel = useCallback(() => {
     setIsEditing(false);
     setIsDataChanged(false);

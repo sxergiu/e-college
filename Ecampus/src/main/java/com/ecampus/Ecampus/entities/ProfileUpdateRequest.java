@@ -30,11 +30,11 @@ public class ProfileUpdateRequest {
         this.university = university;
     }
 
-    public String getPhoneNumber() {
+    public String getPhone() {
         return phone;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    public void setPhone(String phoneNumber) {
         phone = phoneNumber;
     }
 

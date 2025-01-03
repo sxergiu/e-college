@@ -63,7 +63,7 @@ public class FirebaseControllerUser
                     uid,
                     request.getName(),
                     request.getUniversity(),
-                    request.getPhoneNumber(),
+                    request.getPhone(),
                     request.getAddress()
             );
 

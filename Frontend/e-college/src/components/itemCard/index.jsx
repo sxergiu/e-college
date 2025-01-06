@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, DollarSign, User } from "lucide-react";
+import { Clock, DollarSign, User, Heart } from "lucide-react";
 
 const ItemCard = ({ 
   id = '',
@@ -12,6 +12,7 @@ const ItemCard = ({
   condition = '',
   category = '',
   createdAt,
+  onAddToWishlist, // New prop for wishlist action
 }) => {
   const formatDate = (timestamp) => {
     if (!timestamp) return 'No date';
@@ -35,19 +36,21 @@ const ItemCard = ({
   return (
     <div className="w-full max-w-sm h-full flex flex-col bg-white rounded-lg shadow-md overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex justify-between items-start">
+      <div className="p-4 border-b flex justify-between items-start">
+        <div>
           <h3 className="text-2xl font-semibold">{name || 'Untitled Item'}</h3>
-          {isSold && (
-            <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
-              Sold
-            </span>
-          )}
+          <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
+            <Clock size={16} />
+            <span>{formatDate(createdAt)}</span>
+          </div>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
-          <Clock size={16} />
-          <span>{formatDate(createdAt)}</span>
-        </div>
+        <button
+          className="ml-2 p-2 rounded-full hover:bg-gray-100"
+          title="Add to Wishlist"
+          onClick={() => onAddToWishlist(id)}
+        >
+          <Heart size={20} className="text-red-500" />
+        </button>
       </div>
 
       {/* Image */}

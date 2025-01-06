@@ -17,7 +17,7 @@ public class User
     private Double balance = 0.0;
     private Integer rating;
     private Integer numRatings;
-    //private List<Listing> userListings = new ArrayList<>();
+    private Wishlist wishlist;
     //private List<Listing> userWishlist = new ArrayList<>();
 
 
@@ -37,6 +37,7 @@ public class User
         this.rating = rating;
         this.numRatings = numRatings;
         this.phone = phone;
+        this.wishlist = new Wishlist(this.studentId);
     }
 
     public String getName()

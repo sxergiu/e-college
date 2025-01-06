@@ -13,6 +13,7 @@ const ItemCard = ({
   category = '',
   createdAt,
   onAddToWishlist, // New prop for wishlist action
+  isMyItem = false, // New prop to check if it's the user's own item
 }) => {
   const formatDate = (timestamp) => {
     if (!timestamp) return 'No date';
@@ -44,13 +45,16 @@ const ItemCard = ({
             <span>{formatDate(createdAt)}</span>
           </div>
         </div>
-        <button
-          className="ml-2 p-2 rounded-full hover:bg-gray-100"
-          title="Add to Wishlist"
-          onClick={() => onAddToWishlist(id)}
-        >
-          <Heart size={20} className="text-red-500" />
-        </button>
+        {/* Conditionally render heart button */}
+        {!isMyItem && (
+          <button
+            className="ml-2 p-2 rounded-full hover:bg-gray-100"
+            title="Add to Wishlist"
+            onClick={() => onAddToWishlist(id)}
+          >
+            <Heart size={20} className="text-red-500" />
+          </button>
+        )}
       </div>
 
       {/* Image */}

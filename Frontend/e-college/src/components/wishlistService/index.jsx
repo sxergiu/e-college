@@ -9,6 +9,12 @@ export const wishlistService = {
     return response.json();
   },
 
+  getWishlist: async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/wishlist/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch wishlist items');
+    return response.json();
+  },
+
   // Add item to wishlist
   addToWishlist: async (userId, productId) => {
     const response = await fetch(`${API_BASE_URL}/wishlist/${userId}/add?productId=${productId}`, {

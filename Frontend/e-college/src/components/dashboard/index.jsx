@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ItemCard from '../itemCard/index'; // Import the ItemCard component
+import { auth } from "../../firebase/firebase";
 
 // SearchBar component
 const SearchBar = ({ onSearch }) => {
@@ -38,7 +39,9 @@ const SearchBar = ({ onSearch }) => {
 };
 
 const Dashboard = () => {
+  const currentUser = auth.currentUser
   const [items, setItems] = useState({});
+  const [wishlist, setWishlist ] = useState([])
   const [filteredItems, setFilteredItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,6 +53,10 @@ const Dashboard = () => {
         const response = await axios.get("http://localhost:8080/item/returnAllItems"); // Adjust URL as needed
         setItems(response.data); // Set the fetched data
         setFilteredItems(response.data); // Initially show all items
+
+        const wishlistResponse = await axios.get(`http://localhost:8080/wishlist/${currentUser.uid}`  )
+        setWishlist(wishlistResponse.data)
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching items:", err);
@@ -125,6 +132,7 @@ const Dashboard = () => {
                       condition={item.condition}
                       category={item.category}
                       createdAt={item.createdAt}
+                      isWishlisted={wishlist.productIds.includes(item.id)}
                     />
                   ))}
                 </div>

@@ -30,6 +30,7 @@ public class FirebaseControllerItem {
     @PostMapping("/addItem")
     public ResponseEntity<String> addItem(@Valid @RequestBody Item item) {
         try {
+            System.out.println(item.toString());
             String documentId = firebaseServiceItem.addItem(item);
             return ResponseEntity.ok("Item added successfully with ID: " + documentId);
         } catch (Exception e) {

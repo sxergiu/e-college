@@ -113,12 +113,10 @@ public class Item
 
     public void setCategory(String categoryString) {
         try {
-            this.category = ItemCategory.valueOf(categoryString);
+            this.category = ItemCategory.valueOf(categoryString.toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Handle the case where the string doesn't match any enum constant
             System.err.println("Invalid category string: " + categoryString);
-            // Either throw an exception, set a default value, or log a warning
-            this.category = null; // Or a default category
+            this.category = null; // Default or fallback handling
         }
     }
 
@@ -128,15 +126,11 @@ public class Item
     }
 
     public void setCondition(String conditionString) {
-        if (conditionString == null || conditionString.isEmpty()) {
-            this.condition = null; // Or set a default
-            return;
-        }
         try {
-            this.condition = ItemCondition.valueOf(conditionString.toUpperCase()); // Case-insensitive
+            this.condition = ItemCondition.valueOf(conditionString.toUpperCase().replace(" ", "_"));
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid condition string: " + conditionString);
-            this.condition = null; // Or a default condition
+            this.condition = null; // Default or fallback handling
         }
     }
 

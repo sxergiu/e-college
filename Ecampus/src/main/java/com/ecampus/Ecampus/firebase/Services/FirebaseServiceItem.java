@@ -110,12 +110,14 @@ public class FirebaseServiceItem {
                 }
 
                 // Check and set category (ItemCategory)
-                if (documentSnapshot.contains("category")) {
-                    Object category = documentSnapshot.get("category");
-                    if (category instanceof String) {
-                        item.setCategory((String) category); // Converts string to ItemCategory
+                if (documentSnapshot.contains("condition")) {
+                    Object condition = documentSnapshot.get("condition");
+                    System.out.println("Condition received: " + condition);
+                    if (condition instanceof String) {
+                        item.setCondition((String) condition);
                     } else {
-                        System.err.println("Invalid type for category");
+                        assert condition != null;
+                        System.err.println("Invalid type for condition: " + condition.getClass());
                     }
                 }
 
@@ -136,12 +138,14 @@ public class FirebaseServiceItem {
                 }
 
                 // Check and set condition (ItemCondition)
-                if (documentSnapshot.contains("condition")) {
-                    Object condition = documentSnapshot.get("condition");
-                    if (condition instanceof String) {
-                        item.setCondition((String) condition); // Converts string to ItemCondition
+                if (documentSnapshot.contains("category")) {
+                    Object category = documentSnapshot.get("category");
+                    System.out.println("Category received: " + category);
+                    if (category instanceof String) {
+                        item.setCategory((String) category);
                     } else {
-                        System.err.println("Invalid type for condition");
+                        assert category != null;
+                        System.err.println("Invalid type for category: " + category.getClass());
                     }
                 }
 
@@ -177,11 +181,11 @@ public class FirebaseServiceItem {
     }
 
 
-    public String updateItem(String id, Item item) throws ExecutionException, InterruptedException
+    public void updateItem(String id, Item item) throws ExecutionException, InterruptedException
     {
             item.setId(id);
             ApiFuture<WriteResult> collectionApiFuture = firestore.collection("items").document(id).set(item);
-            return collectionApiFuture.get().getUpdateTime().toString();
+        collectionApiFuture.get();
     }
 
     public String deleteItem(String documentID) throws ExecutionException, InterruptedException {
@@ -400,6 +404,7 @@ public class FirebaseServiceItem {
 
         return matchedItems;  // Return matched items
     }
+
 
 
 }

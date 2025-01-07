@@ -14,7 +14,7 @@ const AddItem = () => {
         name: '',
         description: '',
         price: '',
-        image: null,
+        image: '',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,35 +35,76 @@ const AddItem = () => {
         setIsSubmitting(true);
         setError(null);
         setSuccessMessage('');
-
+      
         if (!currentUser?.uid) {
             setError('You must be logged in to add an item.');
             setIsSubmitting(false);
             return;
         }
-
+    
         try {
-            const formDataToSend = new FormData();
-            formDataToSend.append('category', formData.category);
-            formDataToSend.append('condition', formData.condition);
-            formDataToSend.append('name', formData.name);
-            formDataToSend.append('description', formData.description);
-            formDataToSend.append('price', parseFloat(formData.price));
-            formDataToSend.append('userId', currentUser.uid);
-
+            // Prepare image upload to Cloudinary
+            let imageUrl = null;
+            console.log(formData.image)
             if (formData.image) {
-                formDataToSend.append('image', formData.image);
+                const formDataToUpload = new FormData();
+                formDataToUpload.append('file', formData.image);
+                formDataToUpload.append('upload_preset', 'image_upload'); // Upload preset
+                formDataToUpload.append('cloud_name', 'dqfiftv8y'); // Cloud name
+                
+                const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/dqfiftv8y/upload', {
+                    method: 'POST',
+                    body: formDataToUpload,
+                });
+
+                if (!cloudinaryResponse.ok) {
+                    const errorData = await cloudinaryResponse.json(); // Try to get JSON error
+                    console.error("Cloudinary Error:", errorData); // Log the full error
+                    throw new Error(`Image upload to Cloudinary failed: ${cloudinaryResponse.status} ${cloudinaryResponse.statusText}`);
+                }
+    
+                const cloudinaryData = await cloudinaryResponse.json();
+                console.log("Cloudinary Response:", cloudinaryData);
+                if (cloudinaryData.secure_url) {
+                    imageUrl = cloudinaryData.secure_url; // Get the image URL
+                    console.log(imageUrl)
+                } else {
+                    throw new Error('Image upload to Cloudinary failed.');
+                }
             }
-
-            const response = await fetch('http://localhost:8080/item/create', {
+    
+            // Build the payload for backend
+            console.log("The item sent to backend",
+                formData.category,
+                formData.condition,
+                formData.name,
+                formData.description,
+                parseFloat(formData.price),
+                currentUser.uid,
+                imageUrl,)
+            const jsonPayload = {
+                category: formData.category,
+                condition: formData.condition,
+                name: formData.name,
+                description: formData.description,
+                price: parseFloat(formData.price),
+                sellerId: currentUser.uid,
+                images: [imageUrl], // Set the image URL returned from Cloudinary
+            };
+    
+            // Send the data to the backend Spring application
+            const response = await fetch('http://localhost:8080/item/addItem', {
                 method: 'POST',
-                body: formDataToSend,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonPayload),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Failed to add item. Please try again.');
             }
-
+    
             setSuccessMessage('Item added successfully!');
             setFormData({
                 category: '',
@@ -71,7 +112,7 @@ const AddItem = () => {
                 name: '',
                 description: '',
                 price: '',
-                image: null,
+                image: '',
             });
         } catch (err) {
             setError(err.message);
@@ -79,14 +120,6 @@ const AddItem = () => {
             setIsSubmitting(false);
         }
     };
-
-    if (!userLoggedIn) {
-        return (
-            <div className="pt-16 px-4">
-                <p>Please log in to add an item.</p>
-            </div>
-        );
-    }
 
     return (
         <div className="pt-16 px-4 max-w-4xl mx-auto">
@@ -107,9 +140,9 @@ const AddItem = () => {
                         required
                     >
                         <option value="" disabled>Select category</option>
-                        <option value="Electronics">Electronics</option>
+                        <option value="Electronic">Electronics</option>
                         <option value="Furniture">Furniture</option>
-                        <option value="Books">Books</option>
+                        <option value="Book">Book</option>
                         <option value="Clothing">Clothing</option>
                     </select>
                 </div>
@@ -124,9 +157,8 @@ const AddItem = () => {
                     >
                         <option value="" disabled>Select condition</option>
                         <option value="New">New</option>
-                        <option value="Used - Like New">Used - Like New</option>
-                        <option value="Used - Good">Used - Good</option>
-                        <option value="Used - Fair">Used - Fair</option>
+                        <option value="Used">Used</option>
+                        <option value="Like new">Like new</option>
                     </select>
                 </div>
                 <div>

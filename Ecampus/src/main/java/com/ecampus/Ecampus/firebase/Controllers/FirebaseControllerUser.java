@@ -42,10 +42,16 @@ public class FirebaseControllerUser
     }
 
     @PutMapping("/updateUser")
-    public String updateUser(@RequestBody User user) throws ExecutionException, InterruptedException
-    {
+    public String updateUser(@RequestBody User user) throws ExecutionException, InterruptedException {
+        // Check for 'image' instead of 'profilePicture'
+        if (user.getImage() == null || user.getImage().isEmpty()) {
+            throw new IllegalArgumentException("Image URL must be provided.");
+        }
+
         return firebaseService.updateUser(user);
     }
+
+
 
     @DeleteMapping("/deleteUser")
     public String deleteUser(@RequestParam(required = true) String username) throws ExecutionException, InterruptedException

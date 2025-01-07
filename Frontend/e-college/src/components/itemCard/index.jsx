@@ -1,5 +1,6 @@
-import React from 'react';
-import { Clock, DollarSign, User } from "lucide-react";
+import React, { useState } from 'react';
+import { Clock, DollarSign, User, Heart } from "lucide-react";
+import { wishlistService } from '../wishlistService';
 
 const ItemCard = ({ 
   id = '',
@@ -12,7 +13,43 @@ const ItemCard = ({
   condition = '',
   category = '',
   createdAt,
+  isWishlisted = false, // New prop to track wishlist status
+  userId, // New prop for current user
+  onWishlistUpdate, // Callback for wishlist updates
+  isMyItem = false,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isItemWishlisted, setIsItemWishlisted] = useState(isWishlisted); // Local state to manage wishlist toggle
+
+  const handleWishlistToggle = async () => {
+    if (!userId || isMyItem) {
+      console.log('invalid wishlist request');
+      return;
+    }
+  
+    try {
+      setIsLoading(true);
+      // Optimistically update the state first
+      const newWishlistStatus = !isItemWishlisted;
+      setIsItemWishlisted(newWishlistStatus);
+  
+      if (newWishlistStatus) {
+        await wishlistService.addToWishlist(userId, id);
+      } else {
+        await wishlistService.removeFromWishlist(userId, id);
+      }
+  
+      // Trigger callback to update parent state (if provided)
+      if (onWishlistUpdate) {
+        onWishlistUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating wishlist:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const formatDate = (timestamp) => {
     if (!timestamp) return 'No date';
     try {
@@ -35,19 +72,28 @@ const ItemCard = ({
   return (
     <div className="w-full max-w-sm h-full flex flex-col bg-white rounded-lg shadow-md overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b">
-        <div className="flex justify-between items-start">
+      <div className="p-4 border-b flex justify-between items-start">
+        <div>
           <h3 className="text-2xl font-semibold">{name || 'Untitled Item'}</h3>
-          {isSold && (
-            <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
-              Sold
-            </span>
-          )}
+          <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
+            <Clock size={16} />
+            <span>{formatDate(createdAt)}</span>
+          </div>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
-          <Clock size={16} />
-          <span>{formatDate(createdAt)}</span>
-        </div>
+        {!isMyItem && (
+          <button
+            className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
+            title={isItemWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+            onClick={handleWishlistToggle}
+            disabled={isLoading || !userId}
+          >
+            <Heart 
+              size={20} 
+              className={`${isItemWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'} 
+                ${isLoading ? 'animate-pulse' : ''}`}
+            />
+          </button>
+        )}
       </div>
 
       {/* Image */}
@@ -92,7 +138,7 @@ const ItemCard = ({
         {sellerId && (
           <div className="flex items-center space-x-2">
             <User size={16} className="text-gray-500" />
-            <span className="text-sm text-gray-500">Seller ID: {sellerId}</span>
+            <span className="text-sm text-gray-500">Seller ID: {truncateId(sellerId)}</span>
           </div>
         )}
       </div>

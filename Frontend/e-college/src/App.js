@@ -7,6 +7,7 @@ import MyItems from "./components/myItems";
 import { AuthProvider } from "./auth_context";
 import { useRoutes } from "react-router-dom";
 import AddItem from "./components/addItem";
+import Wishlist from "./components/wishlist";
 
 function App() {
   const routesArray = [
@@ -25,6 +26,10 @@ function App() {
     {
       path: "/dashboard",
       element: <Dashboard />,
+    },
+    {
+      path: "/wishlist",
+      element: <Wishlist />
     },
     {
       path: "/my-items",

@@ -1,4 +1,4 @@
-import { Home, LayoutDashboard, MessageCircle, Bell, Box } from 'lucide-react';
+import { Home, LayoutDashboard, MessageCircle, Bell, Box, Heart } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth_context';
@@ -58,6 +58,13 @@ const Header = () => {
                         >
                             <Box size={18} />
                             My Items
+                        </Link>
+                        <Link 
+                            to="/wishlist" 
+                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-blue-600'
+                        >
+                            <Heart size={18} />
+                            Wishlist
                         </Link>
                         <Link 
                             to="/messages" 

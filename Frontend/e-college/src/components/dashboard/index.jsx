@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ItemCard from '../itemCard/index'; // Import the ItemCard component
+import { auth } from "../../firebase/firebase";
 
 // SearchBar component
 const SearchBar = ({ onSearch }) => {
@@ -38,23 +39,31 @@ const SearchBar = ({ onSearch }) => {
 };
 
 const Dashboard = () => {
+  const currentUser = auth.currentUser;
   const [items, setItems] = useState({});
+  const [wishlist, setWishlist] = useState([]);
   const [filteredItems, setFilteredItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Add this line to define the isLoading state
 
   // Fetch items on component load
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/item/returnAllItems"); // Adjust URL as needed
-        setItems(response.data); // Set the fetched data
-        setFilteredItems(response.data); // Initially show all items
-        setLoading(false);
+        setLoading(true); // Start loading
+        const response = await axios.get("http://localhost:8080/item/returnAllItems");
+        setItems(response.data);
+        setFilteredItems(response.data);
+
+        const wishlistResponse = await axios.get(`http://localhost:8080/wishlist/${currentUser.uid}`);
+        setWishlist(wishlistResponse.data);
+
+        setLoading(false); // Stop loading
       } catch (err) {
         console.error("Error fetching items:", err);
         setError("Failed to fetch items. Please try again later.");
-        setLoading(false);
+        setLoading(false); // Stop loading on error
       }
     };
 
@@ -64,16 +73,15 @@ const Dashboard = () => {
   // Search function to filter items
   const handleSearch = (query) => {
     if (!query) {
-      setFilteredItems(items); // If the query is empty, show all items
+      setFilteredItems(items);
       return;
     }
 
     const lowerCaseQuery = query.toLowerCase();
     const filtered = {};
 
-    // Filter items by checking name, description, or category
     Object.entries(items).forEach(([username, sellerItems]) => {
-      const filteredSellerItems = sellerItems.filter(item => 
+      const filteredSellerItems = sellerItems.filter(item =>
         item.name.toLowerCase().includes(lowerCaseQuery) ||
         item.description.toLowerCase().includes(lowerCaseQuery) ||
         item.category.toLowerCase().includes(lowerCaseQuery)
@@ -84,7 +92,21 @@ const Dashboard = () => {
       }
     });
 
-    setFilteredItems(filtered); // Update the state with filtered items
+    setFilteredItems(filtered);
+  };
+
+  const handleWishlistUpdate = async () => {
+    if (currentUser.uid) {
+      try {
+        setIsLoading(true); // Start loading
+        const updatedWishlist = await axios.get(`http://localhost:8080/wishlist/${currentUser.uid}`);
+        setWishlist(updatedWishlist.data);
+      } catch (error) {
+        console.error("Error updating wishlist:", error);
+      } finally {
+        setIsLoading(false); // Stop loading
+      }
+    }
   };
 
   return (
@@ -114,7 +136,7 @@ const Dashboard = () => {
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                   {sellerItems.map((item) => (
                     <ItemCard
-                      key={item.id} // Use item ID as key
+                      key={item.id}
                       id={item.id}
                       sellerId={item.sellerId}
                       name={item.name}
@@ -125,6 +147,9 @@ const Dashboard = () => {
                       condition={item.condition}
                       category={item.category}
                       createdAt={item.createdAt}
+                      onWishlistUpdate={handleWishlistUpdate}
+                      userId={currentUser.uid} // Updated to use uid
+                      isWishlisted={wishlist.productIds.includes(item.id)} // Check if item is in wishlist
                     />
                   ))}
                 </div>

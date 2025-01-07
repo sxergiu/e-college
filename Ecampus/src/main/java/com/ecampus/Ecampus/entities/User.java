@@ -15,7 +15,8 @@ public class User {
     private Double balance = 0.0;
     private Integer rating = 0;
     private Integer numRatings = 0;
-
+    private Wishlist wishlist;
+    //private List<Listing> userWishlist = new ArrayList<>();
     // Default constructor for deserialization
     public User() {}
 
@@ -33,6 +34,8 @@ public class User {
         this.balance = balance;
         this.rating = rating;
         this.numRatings = numRatings;
+        this.phone = phone;
+        this.wishlist = new Wishlist(this.studentId);
     }
 
     // Getters and setters

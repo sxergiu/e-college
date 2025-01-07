@@ -66,13 +66,21 @@ const Wishlist = () => {
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {wishlistItems.map((item) => (
               <ItemCard
-                key={item.id}
-                {...item}
-                userId={currentUser.uid}
-                isWishlisted={true}
-                onWishlistUpdate={fetchWishlistItems}
-                isMyItem={item.sellerId === currentUser.uid}
-              />
+              key={item.id} // Use item ID as key
+              id={item.id}
+              sellerId={item.sellerId}
+              name={item.name}
+              description={item.description}
+              price={item.price}
+              images={item.images}
+              isSold={item.isSold}
+              condition={item.condition}
+              category={item.category}
+              createdAt={item.createdAt}
+              isWishlisted={true}
+              onWishlistUpdate={fetchWishlistItems}
+              isMyItem={item.sellerId === currentUser.uid}
+            />
             ))}
           </div>
         )}

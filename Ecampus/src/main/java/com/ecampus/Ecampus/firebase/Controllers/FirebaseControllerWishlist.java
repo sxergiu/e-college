@@ -63,6 +63,7 @@ public class FirebaseControllerWishlist {
     public ResponseEntity<Wishlist> addItemToWishlist(@PathVariable String userId, @RequestParam String productId) {
         try {
             Wishlist updatedWishlist = firebaseServiceWishlist.addItemToWishlist(userId, productId);
+            System.out.println("Tried adding product: " + productId + " to wishlist of user: " + userId);
             return ResponseEntity.ok(updatedWishlist);
         } catch (ExecutionException | InterruptedException e) {
             return ResponseEntity.internalServerError().body(null);

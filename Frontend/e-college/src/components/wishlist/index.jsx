@@ -1,62 +1,84 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ItemCard from '../itemCard';
-import axios from 'axios';
+import { wishlistService } from '../wishlistService';
+import { auth } from '../../firebase/firebase'
 
 const Wishlist = () => {
-    const [wishlistItems, setWishlistItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const currentUser = auth.currentUser
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchWishlistItems = async () => {
-            try {
-                const response = await axios.get('/api/wishlist'); // Replace with the actual endpoint
-                setWishlistItems(response.data);
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to fetch wishlist items');
-                setLoading(false);
-            }
-        };
+  const fetchWishlistItems = async () => {
+    if (!currentUser.uid) {
+      setLoading(false);
+      return;
+    }
 
-        fetchWishlistItems();
-    }, []);
+    try {
+      setLoading(true);
+      setError(null);
+      const items = await wishlistService.getWishlistItems(currentUser.uid);
+      setWishlistItems(items);
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+      setError('Failed to load wishlist items. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleAddToWishlist = (itemId) => {
-        console.log(`Add item with ID ${itemId} to wishlist`);
-    };
+  useEffect(() => {
+    fetchWishlistItems();
+  }, [currentUser.uid]);
 
-    if (loading) return <div>Loading wishlist items...</div>;
-
-    if (error) return <div>Error: {error}</div>;
-
+  if (!currentUser.uid) {
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">My Wishlist</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {wishlistItems.length > 0 ? (
-                    wishlistItems.map((item) => (
-                        <ItemCard
-                            key={item.id}
-                            id={item.id}
-                            sellerId={item.sellerId}
-                            name={item.name}
-                            description={item.description}
-                            price={item.price}
-                            images={item.images}
-                            isSold={item.isSold}
-                            condition={item.condition}
-                            category={item.category}
-                            createdAt={item.createdAt}
-                            onAddToWishlist={handleAddToWishlist}
-                        />
-                    ))
-                ) : (
-                    <div>No items in your wishlist.</div>
-                )}
-            </div>
+      <div className="pt-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center p-8 bg-gray-50 rounded-lg">
+            <h2 className="text-xl font-semibold text-gray-600">Please log in to view your wishlist</h2>
+          </div>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="pt-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">My Wishlist</h1>
+
+        {loading ? (
+          <div className="text-center p-8">
+            <p>Loading wishlist items...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center p-8 bg-red-50 rounded-lg">
+            <p className="text-red-600">{error}</p>
+          </div>
+        ) : wishlistItems.length === 0 ? (
+          <div className="text-center p-8 bg-gray-50 rounded-lg">
+            <h2 className="text-xl font-semibold text-gray-600">Your wishlist is empty</h2>
+            <p className="text-gray-500 mt-2">Items you add to your wishlist will appear here</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {wishlistItems.map((item) => (
+              <ItemCard
+                key={item.id}
+                {...item}
+                userId={currentUser.uid}
+                isWishlisted={true}
+                onWishlistUpdate={fetchWishlistItems}
+                isMyItem={item.sellerId === currentUser.uid}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Wishlist;

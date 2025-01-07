@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, DollarSign, User, Heart } from "lucide-react";
+import { wishlistService } from '../wishlistService';
 
 const ItemCard = ({ 
   id = '',
@@ -12,9 +13,33 @@ const ItemCard = ({
   condition = '',
   category = '',
   createdAt,
-  onAddToWishlist, // New prop for wishlist action
-  isMyItem = false, // New prop to check if it's the user's own item
+  isWishlisted = false, // New prop to track wishlist status
+  userId, // New prop for current user
+  onWishlistUpdate, // Callback for wishlist updates
+  isMyItem = false,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleWishlistToggle = async () => {
+    if (!userId || isMyItem) return;
+    
+    try {
+      setIsLoading(true);
+      if (isWishlisted) {
+        await wishlistService.removeFromWishlist(userId, id);
+      } else {
+        await wishlistService.addToWishlist(userId, id);
+      }
+      if (onWishlistUpdate) {
+        onWishlistUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating wishlist:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const formatDate = (timestamp) => {
     if (!timestamp) return 'No date';
     try {
@@ -45,14 +70,18 @@ const ItemCard = ({
             <span>{formatDate(createdAt)}</span>
           </div>
         </div>
-        {/* Conditionally render heart button */}
         {!isMyItem && (
           <button
-            className="ml-2 p-2 rounded-full hover:bg-gray-100"
-            title="Add to Wishlist"
-            onClick={() => onAddToWishlist(id)}
+            className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
+            title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+            onClick={handleWishlistToggle}
+            disabled={isLoading || !userId}
           >
-            <Heart size={20} className="text-red-500" />
+            <Heart 
+              size={20} 
+              className={`${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'} 
+                ${isLoading ? 'animate-pulse' : ''}`}
+            />
           </button>
         )}
       </div>
@@ -99,7 +128,7 @@ const ItemCard = ({
         {sellerId && (
           <div className="flex items-center space-x-2">
             <User size={16} className="text-gray-500" />
-            <span className="text-sm text-gray-500">Seller ID: {sellerId}</span>
+            <span className="text-sm text-gray-500">Seller ID: {truncateId(sellerId)}</span>
           </div>
         )}
       </div>

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -58,11 +59,62 @@ public class FirebaseServiceUser
     }
 
 
-    public String updateUser(User user) throws ExecutionException, InterruptedException
-    {
-        ApiFuture<WriteResult> collectionApiFuture = firestore.collection("users").document(user.getUsername()).set(user);
-        return collectionApiFuture.get().getUpdateTime().toString();
+    public String updateUser(User user) throws ExecutionException, InterruptedException {
+        try {
+            System.out.println("User Object: " + user);
+
+            String username = user.getUsername();
+            System.out.println(username);
+
+            if (username == null || username.isEmpty()) {
+                throw new IllegalArgumentException("Username must be provided and cannot be empty.");
+            }
+
+            // Query to find the document with the matching username
+            ApiFuture<QuerySnapshot> querySnapshotApiFuture = firestore.collection("users")
+                    .whereEqualTo("username", username)  // Search by the 'username' field
+                    .get();
+
+            QuerySnapshot querySnapshot = querySnapshotApiFuture.get();
+
+            if (querySnapshot.isEmpty()) {
+                throw new IllegalArgumentException("No user found with the specified username.");
+            }
+
+            // Assuming only one document will match the username, get the first document
+            DocumentSnapshot documentSnapshot = querySnapshot.getDocuments().get(0);
+
+            // Get a reference to the existing document using the random ID of the matched document
+            DocumentReference userDocRef = firestore.collection("users").document(documentSnapshot.getId());
+
+            // Update the fields of the document
+            ApiFuture<WriteResult> collectionApiFuture = userDocRef.update(
+                    "name", user.getName(),
+                    "email", user.getEmail(),
+                    "image", user.getImage(),
+                    "phone", user.getPhone(),
+                    "address", user.getAddress(),
+                    "university", user.getUniversity(),
+                    "bio", user.getBio(),
+                    "balance", user.getBalance(),
+                    "rating", user.getRating(),
+                    "numRatings", user.getNumRatings()
+            );
+
+            // Wait for the update operation to complete
+            WriteResult writeResult = collectionApiFuture.get();
+            return writeResult.getUpdateTime().toString();
+        } catch (Exception e) {
+            e.printStackTrace();  // Log the exception
+            throw new RuntimeException("Error updating Firestore: " + e.getMessage());
+        }
     }
+
+
+
+
+
+
 
     public String deleteUser(String documentID) throws ExecutionException, InterruptedException {
         // Reference the document in the Firestore collection

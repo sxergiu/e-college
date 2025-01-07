@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../../auth_context';
 import { auth, storage } from '../../firebase/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import axios from "axios";
+
 
 const Home = () => {
   const { userLoggedIn } = useAuth();
@@ -47,21 +49,35 @@ const Home = () => {
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
+  
     try {
       setUploadingImage(true);
-      const storageRef = ref(storage, `profile-images/${currentUser.uid}/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      setProfileData((prev) => ({ ...prev, image: downloadURL }));
-      setIsDataChanged(true);
+  
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "image_upload"); // Cloudinary preset
+      formData.append("cloud_name", "dqfiftv8y"); // Cloudinary cloud name
+  
+      const response = await axios.post(
+        `https://api.cloudinary.com/v1_1/dqfiftv8y/image/upload`, 
+        formData
+      );
+  
+      if (response.data.secure_url) {
+        console.log("Uploaded Image URL: ", response.data.secure_url);
+        setProfileData((prev) => ({ ...prev, image: response.data.secure_url }));
+      } else {
+        console.error("Failed to upload image, no URL returned.");
+      }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please try again.');
+      console.error("Error uploading image to Cloudinary:", error);
+      alert("Failed to upload image. Please try again.");
     } finally {
       setUploadingImage(false);
     }
   };
+  
+  
 
   const handleDataChanged = useCallback((field, value) => {
     setProfileData((prev) => ({
@@ -73,16 +89,34 @@ const Home = () => {
 
   const handleSave = useCallback(async () => {
     try {
+      if (!profileData.name || !profileData.university) {
+        alert("Please fill out all required fields before saving.");
+        return;
+      }
   
-      // Send the request to the backend
-      const response = await fetch(`http://localhost:8080/user/editProfile/${currentUser.uid}`, {
-        method: 'PATCH',
+      // Send the request to the backend with the updated image URL and other profile data
+      if (!profileData.image) {
+        console.error("No image URL set.");
+        alert("Image upload failed or URL is missing.");
+        return;
+      }
+
+      console.log(profileData)
+      const response = await fetch(`http://localhost:8080/user/updateUser`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: profileData.name,
           university: profileData.university,
-          phone: profileData.phone, // Ensure key matches the backend
+          phone: profileData.phone, 
           address: profileData.address,
+          image: profileData.image, // The URL from Cloudinary that was set in the frontend
+          id: profileData.id,
+          username: profileData.username,
+          email: profileData.email,
+          bio: profileData.bio || '',
+          balance: profileData.balance || 0,
+          rating: profileData.rating || 0,
         }),
       });
   
@@ -93,16 +127,20 @@ const Home = () => {
   
       // Handle success (e.g., show a success message)
       alert('Profile updated successfully!');
-
-     // await fetchUserData();
-      setIsEditing(false); // Optionally close the editing mode
-
+      setIsEditing(false);
+  
+      // Optionally, fetch the updated user data again or reset states if needed
+      // await fetchUserData();  // Uncomment if you need to reload the data from the backend
+  
     } catch (error) {
-      // Handle error (e.g., show an error message)
       console.error('Error updating profile:', error);
       alert(`Failed to update profile: ${error.message}`);
     }
   }, [profileData, currentUser]);
+  
+  
+  
+  
   
   const handleCancel = useCallback(() => {
     setIsEditing(false);

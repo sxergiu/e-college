@@ -79,6 +79,7 @@ const Wishlist = () => {
               createdAt={item.createdAt}
               isWishlisted={true}
               onWishlistUpdate={fetchWishlistItems}
+              userId={currentUser.uid}
               isMyItem={item.sellerId === currentUser.uid}
             />
             ))}

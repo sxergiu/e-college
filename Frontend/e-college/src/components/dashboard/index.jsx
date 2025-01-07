@@ -94,6 +94,20 @@ const Dashboard = () => {
     setFilteredItems(filtered); // Update the state with filtered items
   };
 
+  const handleWishlistUpdate = async () => {
+    if (currentUser.uid) {
+      try {
+        setIsLoading(true);
+        const updatedItems = await wishlistService.getWishlistItems(currentUser.uid);
+        setWishlistItems(updatedItems); // Update the state after item is added or removed
+      } catch (error) {
+        console.error('Error updating wishlist:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="pt-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -132,6 +146,7 @@ const Dashboard = () => {
                       condition={item.condition}
                       category={item.category}
                       createdAt={item.createdAt}
+                      onWishlistUpdate={handleWishlistUpdate}
                       isWishlisted={wishlist.productIds.includes(item.id)}
                     />
                   ))}

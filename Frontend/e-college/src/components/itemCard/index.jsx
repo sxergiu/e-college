@@ -19,17 +19,27 @@ const ItemCard = ({
   isMyItem = false,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isItemWishlisted, setIsItemWishlisted] = useState(isWishlisted); // Local state to manage wishlist toggle
 
   const handleWishlistToggle = async () => {
-    if (!userId || isMyItem) return;
-    
+    if (!userId || isMyItem) {
+      console.log('invalid wishlist request');
+      return;
+    }
+  
     try {
       setIsLoading(true);
-      if (isWishlisted) {
-        await wishlistService.removeFromWishlist(userId, id);
-      } else {
+      // Optimistically update the state first
+      const newWishlistStatus = !isItemWishlisted;
+      setIsItemWishlisted(newWishlistStatus);
+  
+      if (newWishlistStatus) {
         await wishlistService.addToWishlist(userId, id);
+      } else {
+        await wishlistService.removeFromWishlist(userId, id);
       }
+  
+      // Trigger callback to update parent state (if provided)
       if (onWishlistUpdate) {
         onWishlistUpdate();
       }
@@ -73,13 +83,13 @@ const ItemCard = ({
         {!isMyItem && (
           <button
             className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
-            title={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+            title={isItemWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
             onClick={handleWishlistToggle}
             disabled={isLoading || !userId}
           >
             <Heart 
               size={20} 
-              className={`${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'} 
+              className={`${isItemWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'} 
                 ${isLoading ? 'animate-pulse' : ''}`}
             />
           </button>

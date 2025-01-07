@@ -201,13 +201,14 @@ public class FirebaseServiceWishlist {
     public Wishlist addItemToWishlist(String userId, String productId) throws ExecutionException, InterruptedException {
         try {
             Wishlist wishlist = getWishlistByUserId(userId);
-
+            System.out.println("Attempting to add item to wishlist: " + wishlist);
             if (wishlist == null ) {
                 wishlist = new Wishlist(userId);
             }
 
             if (!wishlist.getProductIds().contains(productId)) {
                 wishlist.getProductIds().add(productId);
+
 
                 // Update Firestore
                 ApiFuture<WriteResult> writeResult = firestore.collection("wishlists").document(userId).set(wishlist);
@@ -231,6 +232,7 @@ public class FirebaseServiceWishlist {
     public Wishlist removeItemFromWishlist(String userId, String productId) throws ExecutionException, InterruptedException {
         try {
             Wishlist wishlist = getWishlistByUserId(userId);
+            System.out.println("Attempting to remove item from wishlist: " + wishlist);
 
             if (wishlist != null && wishlist.getProductIds().contains(productId)) {
                 wishlist.getProductIds().remove(productId);

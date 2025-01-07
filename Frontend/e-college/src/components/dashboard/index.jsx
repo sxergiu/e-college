@@ -87,6 +87,23 @@ const Dashboard = () => {
     setFilteredItems(filtered); // Update the state with filtered items
   };
 
+  const handleAddToWishlist = async (itemId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/wishlist",
+        { itemId }
+      );
+  
+      if (response.status === 200) {
+        alert("Item added to wishlist!");
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      alert("Failed to add item to wishlist. Please try again.");
+    }
+  };
+  
+
   return (
     <div className="pt-12 px-4">
       <div className="max-w-7xl mx-auto">

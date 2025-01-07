@@ -6,8 +6,11 @@ import java.util.Objects;
 
 public class Wishlist {
     private String userId; // Unique identifier for the user
-    private List<String> productIds; // List of product IDs in the wishlist
+    private List<String> productIds = new ArrayList<>(); // List of product IDs in the wishlist
 
+    public Wishlist(){
+
+    }
     // Constructor
     public Wishlist(String userId) {
         this.userId = userId;

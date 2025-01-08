@@ -138,9 +138,7 @@ const Home = () => {
     }
   }, [profileData, currentUser]);
   
-  
-  
-  
+
   
   const handleCancel = useCallback(() => {
     setIsEditing(false);

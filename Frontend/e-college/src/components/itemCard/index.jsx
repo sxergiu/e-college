@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Clock, DollarSign, User, Heart } from "lucide-react";
 import { wishlistService } from '../wishlistService';
+import { createChat } from '../chatService';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const ItemCard = ({ 
   id = '',
@@ -20,6 +22,7 @@ const ItemCard = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isItemWishlisted, setIsItemWishlisted] = useState(isWishlisted); // Local state to manage wishlist toggle
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleWishlistToggle = async () => {
     if (!userId || isMyItem) {
@@ -50,9 +53,26 @@ const ItemCard = ({
     }
   };
 
-  const handleSendMessage = () => {
-    // Logic for sending a message
-    console.log(`Sending message to seller with ID: ${sellerId}`);
+  const handleSendMessage = async () => {
+    if (!sellerId || !userId) {
+      console.error("Cannot create chatroom: Missing sellerId or userId.");
+      return;
+    }
+
+    try {
+      setIsLoading(true); // Optionally, show a loading state
+      // Pass participants as a list
+      const participants = [userId, sellerId]; // List of participants
+      const response = await createChat(participants); // Call your API with the participants list
+
+      console.log("Chatroom created successfully:", response.data);
+      navigate(`/chat`); // Redirect to chat page
+      
+    } catch (error) {
+      console.error("Error creating chatroom:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatDate = (timestamp) => {
@@ -86,22 +106,21 @@ const ItemCard = ({
           </div>
         </div>
         {!isMyItem && (
-        <button
-        className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
-        title={isItemWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-        onClick={handleWishlistToggle}
-        disabled={isLoading || !userId}
-      >
-        <Heart
-          size={20}
-          className={`transition-colors duration-300 ${
-            isItemWishlisted
-              ? 'fill-red-500 text-red-500 hover:fill-gray-400 hover:text-gray-400'
-              : 'fill-transparent text-gray-400 hover:fill-red-500 hover:text-red-500'
-          } ${isLoading ? 'animate-pulse' : ''}`}
-        />
-      </button>
-             
+          <button
+            className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
+            title={isItemWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+            onClick={handleWishlistToggle}
+            disabled={isLoading || !userId}
+          >
+            <Heart
+              size={20}
+              className={`transition-colors duration-300 ${
+                isItemWishlisted
+                  ? 'fill-red-500 text-red-500 hover:fill-gray-400 hover:text-gray-400'
+                  : 'fill-transparent text-gray-400 hover:fill-red-500 hover:text-red-500'
+              } ${isLoading ? 'animate-pulse' : ''}`}
+            />
+          </button>
         )}
       </div>
 

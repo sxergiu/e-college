@@ -132,5 +132,26 @@ public class ChatService {
         }
     }
 
+    public String findChatByParticipants(List<String> participants) throws Exception {
+        // Sort participants list to ensure order doesn't affect the comparison
+        Collections.sort(participants);
+
+        // Query Firestore for a chat room with matching participants
+        ApiFuture<QuerySnapshot> future = db.collection("chats")
+                .whereArrayContains("participants", participants.get(0)) // Ensure the first participant exists
+                .get();
+
+        // Iterate through the chat rooms to find an exact match for all participants
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            List<String> existingParticipants = (List<String>) document.get("participants");
+            Collections.sort(existingParticipants); // Sort to compare without considering order
+
+            if (existingParticipants.equals(participants)) {
+                return document.getId(); // Return the chat ID if a match is found
+            }
+        }
+
+        return null; // Return null if no matching chat room is found
+    }
 
 }

@@ -5,7 +5,7 @@ const API_BASE_URL = "http://localhost:8080/chats"; // Replace with your backend
 // Create a new chat
 export const createChat = async (participants) => {
   try {
-    const response = await axios.post(API_BASE_URL, { participants });
+    const response = await axios.post(`${API_BASE_URL}/create`, { participants });
     return response.data; // Return chat object with chatId
   } catch (error) {
     console.error("Error creating chat:", error);

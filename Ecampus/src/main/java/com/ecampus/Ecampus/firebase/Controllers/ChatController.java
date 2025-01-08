@@ -22,7 +22,6 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    // Endpoint to create a new chat
     @PostMapping("/create")
     public ResponseEntity<String> createChat(@RequestBody Map<String, Object> request) {
         try {
@@ -30,16 +29,31 @@ public class ChatController {
             if (!request.containsKey("participants")) {
                 return ResponseEntity.badRequest().body("Participants are required.");
             }
-            String[] participants = ((String) request.get("participants")).split(",");
 
-            // Create the chat
-            String chatId = chatService.createChat(participants);
+            // Correct way to handle participants as a list
+            List<String> participants = (List<String>) request.get("participants");
+
+            // Check if participants list is empty
+            if (participants == null || participants.isEmpty()) {
+                return ResponseEntity.badRequest().body("At least one participant is required.");
+            }
+
+            // Check if a chat with the same participants already exists
+            String existingChatId = chatService.findChatByParticipants(participants);
+            if (existingChatId != null) {
+                // Return OK if the chat already exists
+                return ResponseEntity.ok("Chat already exists with ID: " + existingChatId);
+            }
+
+            // Create the chat if no existing chat was found
+            String chatId = chatService.createChat(participants.toArray(new String[0])); // Convert to array if necessary
             return ResponseEntity.ok("Chat created with ID: " + chatId);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("Error creating chat: " + e.getMessage());
         }
     }
+
 
     // Endpoint to add a message to a chat
     @PostMapping("/{chatId}/messages")

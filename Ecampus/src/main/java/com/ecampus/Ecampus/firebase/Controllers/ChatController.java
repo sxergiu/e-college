@@ -2,9 +2,12 @@ package com.ecampus.Ecampus.firebase.Controllers;
 
 import com.ecampus.Ecampus.firebase.Services.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -59,4 +62,15 @@ public class ChatController {
             return ResponseEntity.internalServerError().body("Error adding message: " + e.getMessage());
         }
     }
+
+    @GetMapping("/user/{userId}")
+    public List<Map<String, Object>> getUserChats(@PathVariable String userId) {
+        try {
+            return chatService.getUserChats(userId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching chats", e);
+        }
+    }
+
+
 }

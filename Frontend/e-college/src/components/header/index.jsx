@@ -67,7 +67,7 @@ const Header = () => {
                             Wishlist
                         </Link>
                         <Link 
-                            to="/messages" 
+                            to="/chat" 
                             className='text-gray-700 hover:text-blue-600'
                         >
                             <MessageCircle size={20} />

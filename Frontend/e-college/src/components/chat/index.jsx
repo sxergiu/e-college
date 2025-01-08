@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getUserChats, createChat, addMessage } from "../chatService";
+import { getUserChats, createChat, addMessage, getMessagesForChat } from "../chatService";
 import { auth } from "../../firebase/firebase";
 
 const ChatComponent = () => {
@@ -13,10 +13,9 @@ const ChatComponent = () => {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Ensure Firebase is initialized and auth.currentUser is available
     const currentUser = auth.currentUser;
     if (currentUser) {
-      setUserId(currentUser.uid); // Extract userId from currentUser
+      setUserId(currentUser.uid);
     } else {
       setError("User not authenticated");
     }
@@ -38,9 +37,22 @@ const ChatComponent = () => {
     }
   }, [userId]);
 
+  useEffect(() => {
+    if (selectedChatId) {
+      const fetchMessages = async () => {
+        try {
+          const chatMessages = await getMessagesForChat(selectedChatId);
+          setMessages(chatMessages);
+        } catch (err) {
+          setError("Failed to load messages");
+        }
+      };
+      fetchMessages();
+    }
+  }, [selectedChatId]);
+
   const handleCreateChat = async () => {
     if (!newParticipants.trim()) return;
-    
     const participants = newParticipants.split(",").map((p) => p.trim());
     try {
       const newChat = await createChat(participants);
@@ -54,10 +66,22 @@ const ChatComponent = () => {
   const handleAddMessage = async (e) => {
     e.preventDefault();
     if (!newMessage || !selectedChatId || !userId) return;
-
+    
     try {
+      // Add the message to Firestore
       await addMessage(selectedChatId, userId, newMessage);
-      setMessages([...messages, { id: Date.now(), sender: userId, text: newMessage }]);
+  
+      // Create the new message data
+      const newMessageData = {
+        senderId: userId,
+        message: newMessage,
+        id: Date.now(),
+      };
+  
+      // Update the local messages state to immediately reflect the new message
+      setMessages((prevMessages) => [...prevMessages, newMessageData]);
+  
+      // Clear the newMessage input
       setNewMessage("");
     } catch (err) {
       setError("Failed to send message");
@@ -78,7 +102,6 @@ const ChatComponent = () => {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] mt-16">
-      {/* Rest of the component remains the same */}
       {/* Sidebar with chat list */}
       <div className="w-64 border-r bg-gray-50 flex flex-col">
         <div className="p-4 border-b">
@@ -87,13 +110,13 @@ const ChatComponent = () => {
             <input
               type="text"
               placeholder="New participants..."
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               value={newParticipants}
               onChange={(e) => setNewParticipants(e.target.value)}
             />
             <button 
               onClick={handleCreateChat}
-              className="w-full px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center gap-2"
+              className="w-full px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center justify-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -107,22 +130,22 @@ const ChatComponent = () => {
             <p className="text-gray-500 text-sm text-center p-4">No chats available</p>
           ) : (
             <div className="space-y-2">
-              {chats.map((chat) => (
-                <button
-                  key={chat.chatId}
-                  onClick={() => setSelectedChatId(chat.chatId)}
-                  className={`w-full px-3 py-2 rounded-md text-left transition-colors ${
-                    selectedChatId === chat.chatId
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <div className="font-medium">Chat {chat.chatId}</div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {chat.participants.join(", ")}
-                  </div>
-                </button>
-              ))}
+              {chats.map((chat) => {
+                const otherParticipant = chat.participants.find(p => p !== userId);
+                const otherParticipantUsername = chat.participantsUsernames.find(username => username !== userId);
+                return (
+                  <button
+                    key={chat.chatId}
+                    onClick={() => setSelectedChatId(chat.chatId)}
+                    className={`w-full px-3 py-2 rounded-md text-left transition-colors ${selectedChatId === chat.chatId ? 'bg-indigo-100 text-indigo-800' : 'hover:bg-gray-100'}`}
+                  >
+                    <div className="font-medium">{otherParticipantUsername}</div>
+                    <div className="text-xs text-gray-500 truncate">
+                      {chat.lastMessage || "No messages yet"}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -143,23 +166,19 @@ const ChatComponent = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                 </svg>
-                {chats.find(c => c.chatId === selectedChatId)?.participants.join(", ")}
+                {chats.find(c => c.chatId === selectedChatId)?.participantsUsernames.filter(username => username !== userId).join(", ")}
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`mb-4 flex ${msg.sender === userId ? 'justify-end' : 'justify-start'}`}
+                  className={`mb-4 flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                      msg.sender === userId
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white text-gray-900 shadow'
-                    }`}
+                    className={`max-w-[70%] rounded-lg px-4 py-2 ${msg.senderId === userId ? 'bg-indigo-500 text-white' : 'bg-white text-gray-900 shadow'}`}
                   >
-                    {msg.text}
+                    <div>{msg.message}</div> {/* Display message content */}
                   </div>
                 </div>
               ))}
@@ -169,13 +188,13 @@ const ChatComponent = () => {
                 <input
                   type="text"
                   placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                 />
                 <button 
                   type="submit"
-                  className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="px-4 py-2 text-white bg-indigo-500 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />

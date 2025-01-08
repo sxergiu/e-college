@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -72,5 +73,15 @@ public class ChatController {
         }
     }
 
+    @GetMapping("/{chatId}/messages")
+    public List<Map<String, Object>> getMessages(@PathVariable String chatId) {
+        try {
+            return chatService.getMessagesWithUsernames(chatId); // Fetch messages with usernames
+        } catch (Exception e) {
+            // Handle exception properly (e.g., return an error response)
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
 
 }

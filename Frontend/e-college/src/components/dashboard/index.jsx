@@ -31,7 +31,7 @@ const SearchBar = ({ onSearch }) => {
         placeholder="Search for items..."
         className="border p-2 rounded w-full sm:w-80"
       />
-      <button onClick={handleSearch} className="ml-2 p-2 bg-blue-500 text-white rounded">
+      <button onClick={handleSearch} className="ml-2 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
         Search
       </button>
     </div>

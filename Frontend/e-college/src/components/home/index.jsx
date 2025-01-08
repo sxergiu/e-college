@@ -33,7 +33,7 @@ const Home = () => {
           university: userData.university || 'Not specified',
           bio: userData.bio || '',
           balance: userData.balance || 0,
-          image: userData.profilePicture || 'https://via.placeholder.com/80',
+          image: userData.image || 'https://via.placeholder.com/80',
           rating: userData.rating || 0,
         });
         setIsLoading(false);
@@ -138,9 +138,7 @@ const Home = () => {
     }
   }, [profileData, currentUser]);
   
-  
-  
-  
+
   
   const handleCancel = useCallback(() => {
     setIsEditing(false);

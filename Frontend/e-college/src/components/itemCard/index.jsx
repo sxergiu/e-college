@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Clock, DollarSign, User, Heart } from "lucide-react";
 import { wishlistService } from '../wishlistService';
+import { createChat } from '../chatService';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const ItemCard = ({ 
   id = '',
@@ -20,6 +22,7 @@ const ItemCard = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isItemWishlisted, setIsItemWishlisted] = useState(isWishlisted); // Local state to manage wishlist toggle
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleWishlistToggle = async () => {
     if (!userId || isMyItem) {
@@ -45,6 +48,28 @@ const ItemCard = ({
       }
     } catch (error) {
       console.error('Error updating wishlist:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!sellerId || !userId) {
+      console.error("Cannot create chatroom: Missing sellerId or userId.");
+      return;
+    }
+
+    try {
+      setIsLoading(true); // Optionally, show a loading state
+      // Pass participants as a list
+      const participants = [userId, sellerId]; // List of participants
+      const response = await createChat(participants); // Call your API with the participants list
+
+      console.log("Chatroom created successfully:", response.data);
+      navigate(`/chat`); // Redirect to chat page
+      
+    } catch (error) {
+      console.error("Error creating chatroom:", error);
     } finally {
       setIsLoading(false);
     }
@@ -87,10 +112,13 @@ const ItemCard = ({
             onClick={handleWishlistToggle}
             disabled={isLoading || !userId}
           >
-            <Heart 
-              size={20} 
-              className={`${isItemWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'} 
-                ${isLoading ? 'animate-pulse' : ''}`}
+            <Heart
+              size={20}
+              className={`transition-colors duration-300 ${
+                isItemWishlisted
+                  ? 'fill-red-500 text-red-500 hover:fill-gray-400 hover:text-gray-400'
+                  : 'fill-transparent text-gray-400 hover:fill-red-500 hover:text-red-500'
+              } ${isLoading ? 'animate-pulse' : ''}`}
             />
           </button>
         )}
@@ -98,7 +126,7 @@ const ItemCard = ({
 
       {/* Image */}
       {Array.isArray(images) && images.length > 0 && (
-        <div className="relative w-full h-48">
+        <div className="relative w-full h-58">
           <img
             src={images[0]}
             alt={name}
@@ -139,6 +167,14 @@ const ItemCard = ({
           <div className="flex items-center space-x-2">
             <User size={16} className="text-gray-500" />
             <span className="text-sm text-gray-500">Seller ID: {truncateId(sellerId)}</span>
+            {!isMyItem && (
+              <button
+                className="ml-2 px-3 py-1 text-sm font-semibold text-white bg-indigo-500 rounded hover:bg-indigo-600"
+                onClick={handleSendMessage}
+              >
+                Send Message
+              </button>
+            )}
           </div>
         )}
       </div>

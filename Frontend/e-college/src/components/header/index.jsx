@@ -28,14 +28,14 @@ const Header = () => {
                     <>
                         <Link 
                             to="/" 
-                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-blue-600'
+                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-indigo-600'
                         >
                             <Home size={18} />
                             Home
                         </Link>
                         <Link 
                             to="/dashboard" 
-                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-blue-600'
+                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-indigo-600'
                         >
                             <LayoutDashboard size={18} />
                             Dashboard
@@ -54,33 +54,33 @@ const Header = () => {
                     <>
                         <Link 
                             to="/my-items" 
-                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-blue-600'
+                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-indigo-600'
                         >
                             <Box size={18} />
                             My Items
                         </Link>
                         <Link 
                             to="/wishlist" 
-                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-blue-600'
+                            className='flex items-center gap-x-1 text-sm text-gray-700 hover:text-indigo-600'
                         >
                             <Heart size={18} />
                             Wishlist
                         </Link>
                         <Link 
-                            to="/messages" 
-                            className='text-gray-700 hover:text-blue-600'
+                            to="/chat" 
+                            className='text-gray-700 hover:text-indigo-600'
                         >
                             <MessageCircle size={20} />
                         </Link>
                         <Link 
                             to="/notifications" 
-                            className='text-gray-700 hover:text-blue-600'
+                            className='text-gray-700 hover:text-indigo-600'
                         >
                             <Bell size={20} />
                         </Link>
                         <button 
                             onClick={handleLogout}
-                            className='text-sm text-blue-600 hover:text-blue-800'
+                            className='text-sm text-indigo-600 hover:text-indigo-800'
                         >
                             Logout
                         </button>
@@ -88,13 +88,13 @@ const Header = () => {
                 ) : (
                     <>
                         <Link 
-                            className='text-sm text-blue-600 hover:text-blue-800' 
+                            className='text-sm text-indigo-600 hover:text-indigo-800' 
                             to='/login'
                         >
                             Login
                         </Link>
                         <Link 
-                            className='text-sm text-blue-600 hover:text-blue-800' 
+                            className='text-sm text-indigo-600 hover:text-indigo-800' 
                             to='/register'
                         >
                             Register

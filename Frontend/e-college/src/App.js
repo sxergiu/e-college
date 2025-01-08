@@ -8,6 +8,10 @@ import { AuthProvider } from "./auth_context";
 import { useRoutes } from "react-router-dom";
 import AddItem from "./components/addItem";
 import Wishlist from "./components/wishlist";
+import ChatComponent from "./components/chat";
+import { auth } from "./firebase/firebase";
+
+const currentUser = auth.currentUser;
 
 function App() {
   const routesArray = [
@@ -38,6 +42,10 @@ function App() {
     {
       path: "/my-items/add-item",
       element: <AddItem />
+    },
+    {
+      path: "/chat",
+      element: <ChatComponent />
     },
     {
       path: "*", // Catch-all route for undefined paths

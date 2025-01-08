@@ -12,6 +12,7 @@ const MyItems = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    
     useEffect(() => {
         const fetchUserItems = async () => {
             if (!currentUser?.uid) return;
@@ -40,6 +41,20 @@ const MyItems = () => {
             }
         };
 
+        const refreshItems = async () => {
+            const response = await fetch("http://localhost:8080/item/getItems");
+            if (!response.ok) {
+              throw new Error("Failed to fetch items.");
+            }
+            const items = await response.json();
+            setItems(items);  // Update the state with the new list
+          };
+        
+          // Navigate to the edit page
+          const editItem = (id) => {
+            navigate(`/my-items/edit/${id}`);
+          };
+
         if (userLoggedIn) {
             fetchUserItems();
         }
@@ -52,6 +67,34 @@ const MyItems = () => {
             </div>
         );
     }
+
+    const editItem = (itemId) => {
+        console.log('Navigating to edit item:', itemId);
+        navigate(`/my-items/edit-item/${itemId}`);
+      };
+
+    const deleteItem = async (itemId) => {
+        if (!window.confirm("Are you sure you want to delete this item?")) {
+            return; // Exit if user cancels
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/item/deleteItem/${itemId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to delete item with ID: ${itemId}`);
+            }
+
+            // Remove the deleted item from the list
+            setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+            alert('Item deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting item:', error);
+            alert('Failed to delete item. Please try again.');
+        }
+    };
 
     return (
         <div className="pt-16 px-4 max-w-7xl mx-auto">
@@ -85,8 +128,13 @@ const MyItems = () => {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {items.map(item => (
-                        <ItemCard key={item.id} {...item} 
-                        isMyItem={item.sellerId === currentUser.uid}/>
+                        <ItemCard 
+                            key={item.id} 
+                            {...item} 
+                            isMyItem={item.sellerId === currentUser.uid}
+                            onEdit={() => editItem(item.id)} 
+                            onDelete={() => deleteItem(item.id)} 
+                        />
                     ))}
                 </div>
             )}

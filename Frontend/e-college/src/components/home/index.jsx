@@ -16,6 +16,7 @@ const Home = () => {
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  console.log(currentUser.uid)
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -33,7 +34,7 @@ const Home = () => {
           university: userData.university || 'Not specified',
           bio: userData.bio || '',
           balance: userData.balance || 0,
-          image: userData.profilePicture || 'https://via.placeholder.com/80',
+          image: userData.image || 'https://via.placeholder.com/80',
           rating: userData.rating || 0,
         });
         setIsLoading(false);
@@ -66,6 +67,7 @@ const Home = () => {
       if (response.data.secure_url) {
         console.log("Uploaded Image URL: ", response.data.secure_url);
         setProfileData((prev) => ({ ...prev, image: response.data.secure_url }));
+        setIsDataChanged(true); // Mark as data changed
       } else {
         console.error("Failed to upload image, no URL returned.");
       }

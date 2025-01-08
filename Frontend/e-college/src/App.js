@@ -8,6 +8,7 @@ import { AuthProvider } from "./auth_context";
 import { useRoutes } from "react-router-dom";
 import AddItem from "./components/addItem";
 import Wishlist from "./components/wishlist";
+import EditItemPage from "./components/editItem"; // Import the EditItemPage component
 
 function App() {
   const routesArray = [
@@ -38,6 +39,10 @@ function App() {
     {
       path: "/my-items/add-item",
       element: <AddItem />
+    },
+    {
+      path: "/my-items/edit-item/:itemId", // Add the route for editing items
+      element: <EditItemPage /> // Render EditItemPage for this route
     },
     {
       path: "*", // Catch-all route for undefined paths

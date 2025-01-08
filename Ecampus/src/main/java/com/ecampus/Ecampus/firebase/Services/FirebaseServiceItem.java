@@ -405,6 +405,23 @@ public class FirebaseServiceItem {
         return matchedItems;  // Return matched items
     }
 
+    public Item getItemById(String itemId) throws FirebaseException, ExecutionException, InterruptedException {
+        // Reference to the 'items' collection
+        DocumentReference itemRef = firestore.collection("items").document(itemId);
 
+        // Fetch the document synchronously
+        ApiFuture<DocumentSnapshot> future = itemRef.get();
+        DocumentSnapshot document = future.get();  // Get the document
 
+        if (document.exists())
+        {
+            // Convert the document to an Item object
+            Item item = document.toObject(Item.class);
+            if (item != null)
+            {
+                return item;
+            }
+        }
+        return null;
+    }
 }

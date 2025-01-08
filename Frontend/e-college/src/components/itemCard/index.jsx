@@ -50,6 +50,11 @@ const ItemCard = ({
     }
   };
 
+  const handleSendMessage = () => {
+    // Logic for sending a message
+    console.log(`Sending message to seller with ID: ${sellerId}`);
+  };
+
   const formatDate = (timestamp) => {
     if (!timestamp) return 'No date';
     try {
@@ -81,24 +86,28 @@ const ItemCard = ({
           </div>
         </div>
         {!isMyItem && (
-          <button
-            className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
-            title={isItemWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-            onClick={handleWishlistToggle}
-            disabled={isLoading || !userId}
-          >
-            <Heart 
-              size={20} 
-              className={`${isItemWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'} 
-                ${isLoading ? 'animate-pulse' : ''}`}
-            />
-          </button>
+        <button
+        className="ml-2 p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
+        title={isItemWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+        onClick={handleWishlistToggle}
+        disabled={isLoading || !userId}
+      >
+        <Heart
+          size={20}
+          className={`transition-colors duration-300 ${
+            isItemWishlisted
+              ? 'fill-red-500 text-red-500 hover:fill-gray-400 hover:text-gray-400'
+              : 'fill-transparent text-gray-400 hover:fill-red-500 hover:text-red-500'
+          } ${isLoading ? 'animate-pulse' : ''}`}
+        />
+      </button>
+             
         )}
       </div>
 
       {/* Image */}
       {Array.isArray(images) && images.length > 0 && (
-        <div className="relative w-full h-48">
+        <div className="relative w-full h-58">
           <img
             src={images[0]}
             alt={name}
@@ -139,6 +148,14 @@ const ItemCard = ({
           <div className="flex items-center space-x-2">
             <User size={16} className="text-gray-500" />
             <span className="text-sm text-gray-500">Seller ID: {truncateId(sellerId)}</span>
+            {!isMyItem && (
+              <button
+                className="ml-2 px-3 py-1 text-sm font-semibold text-white bg-indigo-500 rounded hover:bg-indigo-600"
+                onClick={handleSendMessage}
+              >
+                Send Message
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -9,6 +9,10 @@ import { useRoutes } from "react-router-dom";
 import AddItem from "./components/addItem";
 import Wishlist from "./components/wishlist";
 import EditItemPage from "./components/editItem"; // Import the EditItemPage component
+import ChatComponent from "./components/chat";
+import { auth } from "./firebase/firebase";
+
+const currentUser = auth.currentUser;
 
 function App() {
   const routesArray = [
@@ -43,6 +47,10 @@ function App() {
     {
       path: "/my-items/edit-item/:itemId", // Add the route for editing items
       element: <EditItemPage /> // Render EditItemPage for this route
+    },
+    {
+      path: "/chat",
+      element: <ChatComponent />
     },
     {
       path: "*", // Catch-all route for undefined paths

@@ -121,4 +121,27 @@ public class FirebaseControllerItem {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/getItemById/{id}")
+    public ResponseEntity<?> getItemById(@PathVariable String id) {
+        try {
+            // Fetch item using the service layer
+            Item item = firebaseServiceItem.getItem(id);
+
+            // Log the item (using logger instead of System.out.println)
+            logger.info("Fetched item: {}", item);
+
+            // Return the item as a response
+            return ResponseEntity.ok(item);
+        } catch (ExecutionException | InterruptedException e) {
+            logger.error("Error while fetching item with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(500).body("Error while fetching item data.");
+        } catch (FirebaseException e) {
+            logger.error("FirebaseException occurred while fetching item with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(500).body("Failed to load item from Firebase.");
+        } catch (Exception e) {
+            logger.error("Unexpected error occurred while fetching item with ID {}: {}", id, e.getMessage());
+            return ResponseEntity.status(500).body("Unexpected error occurred.");
+        }
+    }
 }

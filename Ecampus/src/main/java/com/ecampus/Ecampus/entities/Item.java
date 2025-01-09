@@ -17,20 +17,21 @@ public class Item
     private ItemCondition condition;
     private ItemCategory category;
     private Timestamp createdAt = new Timestamp(System.currentTimeMillis());
-    private Timestamp updatedAt;
+    private Timestamp updatedAt = createdAt;  // Initially set to the same as createdAt
 
     public Item()
     {
     }
 
-    public Item(String sellerId, String name, String description, double price, ItemCategory category, List<String> images, ItemCondition condition) {
-        this.sellerId = sellerId;
+    public Item(String sellerId, String name, String description, double price, ItemCategory category, List<String> images, ItemCondition condition) {        this.sellerId = sellerId;
         this.name = name;
         this.description = description;
         this.price = price;
         this.category = category;
         this.images = images;
         this.condition = condition;
+        this.createdAt = new Timestamp(System.currentTimeMillis());  // Set createdAt
+        this.updatedAt = createdAt;  // Set updatedAt to be same as createdAt
     }
 
     public String getId() {
@@ -55,6 +56,7 @@ public class Item
 
     public void setName(String name) {
         this.name = name;
+        updateUpdatedAt();  // Update updatedAt when name is changed
     }
 
     public String getDescription() {
@@ -63,6 +65,7 @@ public class Item
 
     public void setDescription(String description) {
         this.description = description;
+        updateUpdatedAt();  // Update updatedAt when description is changed
     }
 
     public double getPrice() {
@@ -71,15 +74,16 @@ public class Item
 
     public void setPrice(double price) {
         this.price = price;
+        updateUpdatedAt();  // Update updatedAt when price is changed
     }
 
     public List<String> getImages() {
         return images;
     }
 
-    public void setImages(List<String> images)
-    {
+    public void setImages(List<String> images) {
         this.images = images;
+        updateUpdatedAt();  // Update updatedAt when images are changed
     }
 
     public boolean isSold() {
@@ -88,7 +92,9 @@ public class Item
 
     public void setSold(boolean sold) {
         isSold = sold;
+        updateUpdatedAt();  // Update updatedAt when sold status is changed
     }
+
 
     public Timestamp getCreatedAt() {
         return createdAt;
@@ -113,12 +119,14 @@ public class Item
 
     public void setCategory(String categoryString) {
         try {
-            this.category = ItemCategory.valueOf(categoryString.toUpperCase());
+            this.category = ItemCategory.fromString(categoryString);
+            updateUpdatedAt();  // Update updatedAt when category is changed
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid category string: " + categoryString);
             this.category = null; // Default or fallback handling
         }
     }
+
 
     public ItemCondition getCondition()
     {
@@ -128,12 +136,16 @@ public class Item
     public void setCondition(String conditionString) {
         try {
             this.condition = ItemCondition.valueOf(conditionString.toUpperCase().replace(" ", "_"));
+            updateUpdatedAt();  // Update updatedAt when condition is changed
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid condition string: " + conditionString);
             this.condition = null; // Default or fallback handling
         }
     }
 
+    private void updateUpdatedAt() {
+        this.updatedAt = new Timestamp(System.currentTimeMillis());
+    }
 
     @Override
     public String toString() {
@@ -148,6 +160,7 @@ public class Item
                 ", condition='" + condition + '\'' +
                 ", sold=" + isSold +
                 ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
 }

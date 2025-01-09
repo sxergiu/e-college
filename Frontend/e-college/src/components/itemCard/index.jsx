@@ -194,7 +194,7 @@ const ItemCard = ({
         {isMyItem && (
           <div className="flex justify-between mt-4">
             <button
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+              className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600"
               onClick={() => onEdit(id)}
             >
               Edit

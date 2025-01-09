@@ -217,7 +217,7 @@ const EditItemPage = () => {
         <div className="mt-4">
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+            className="bg-indigo-500 text-white px-4 py-2 rounded-lg"
             disabled={isLoading}
           >
             {isLoading ? "Updating..." : "Update Item"}

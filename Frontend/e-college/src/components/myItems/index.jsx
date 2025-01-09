@@ -105,7 +105,7 @@ const MyItems = () => {
                         {items.length} item{items.length !== 1 ? 's' : ''} listed
                     </p>
                     <button 
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                         onClick={() => navigate('/my-items/add-item')} // Navigate to item upload page
                     >
                         List New Item

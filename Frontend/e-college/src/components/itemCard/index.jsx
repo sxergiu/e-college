@@ -120,7 +120,7 @@ const ItemCard = ({
 
       {/* Image Carousel */}
       {images.length > 0 && (
-        <div className="relative w-full h-64">
+        <div className="relative w-full h-96">
           <img
             src={images[currentImageIndex]}
             alt={name}
@@ -185,7 +185,6 @@ const ItemCard = ({
       <div className="border-t p-4">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
-            <DollarSign size={20} className="text-green-600" />
             <span className="text-xl font-bold text-green-600">
               ${price.toFixed(2)}
             </span>

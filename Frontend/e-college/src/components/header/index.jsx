@@ -1,17 +1,18 @@
 import { Home, LayoutDashboard, MessageCircle, Bell, Box, Heart } from 'lucide-react';
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth_context';
 import { doSignOut } from '../../firebase/auth';
+import NotificationTab from '../Notifications/NotificationTab';
 
 const Header = () => {
     const navigate = useNavigate();
     const { userLoggedIn } = useAuth();
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Toggle for notifications
 
     const handleLogout = useCallback(async () => {
         try {
             await doSignOut();
-            // Wrap navigation in setTimeout to avoid concurrent rendering issues
             setTimeout(() => {
                 navigate('/login', { replace: true });
             }, 0);
@@ -19,6 +20,10 @@ const Header = () => {
             console.error("Logout error:", error);
         }
     }, [navigate]);
+
+    const toggleNotifications = () => {
+        setIsNotificationOpen(prevState => !prevState); // Toggle notification tab
+    };
 
     return (
         <nav className='flex flex-row justify-between w-full z-20 fixed top-0 left-0 h-12 border-b bg-gray-200 px-4'>
@@ -72,12 +77,16 @@ const Header = () => {
                         >
                             <MessageCircle size={20} />
                         </Link>
-                        <Link 
-                            to="/notifications" 
-                            className='text-gray-700 hover:text-indigo-600'
+
+                        {/* Bell icon for notifications */}
+                        <button 
+                            onClick={toggleNotifications} 
+                            className='text-gray-700 hover:text-indigo-600 relative'
                         >
                             <Bell size={20} />
-                        </Link>
+                            {isNotificationOpen && <NotificationTab />} {/* Show NotificationTab when Bell icon is clicked */}
+                        </button>
+
                         <button 
                             onClick={handleLogout}
                             className='text-sm text-indigo-600 hover:text-indigo-800'

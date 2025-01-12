@@ -81,6 +81,13 @@ const EditItemPage = () => {
     }));
   };
 
+  const handleImageRemove = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index), // Remove the image at the specified index
+    }));
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();

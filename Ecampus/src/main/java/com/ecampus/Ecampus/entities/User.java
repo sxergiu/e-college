@@ -1,12 +1,13 @@
 package com.ecampus.Ecampus.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.stereotype.Component;
+
 
 public class User {
     private String name;
     private String email;
     private String image;
-    private String studentId;
+    private String userId;
     private String phone;
     private String address;
     private String university;
@@ -21,11 +22,11 @@ public class User {
     public User() {}
 
     // Constructor with all fields
-    public User(String name, String email, String image, String studentId, String phone, String address, String university, String bio, String username, Double balance, Integer rating, Integer numRatings) {
+    public User(String name, String email, String image, String userId, String phone, String address, String university, String bio, String username, Double balance, Integer rating, Integer numRatings) {
         this.name = name;
         this.email = email;
         this.image = image;
-        this.studentId = studentId;
+        this.userId = userId;
         this.phone = phone;
         this.address = address;
         this.university = university;
@@ -35,7 +36,7 @@ public class User {
         this.rating = rating;
         this.numRatings = numRatings;
         this.phone = phone;
-        this.wishlist = new Wishlist(this.studentId);
+        this.wishlist = new Wishlist(this.userId);
     }
 
     // Getters and setters
@@ -63,12 +64,12 @@ public class User {
         this.image = image;
     }
 
-    public String getStudentId() {
-        return studentId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getPhone() {
@@ -142,7 +143,7 @@ public class User {
                 "name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", image='" + image + '\'' +
-                ", studentId='" + studentId + '\'' +
+                ", studentId='" + userId + '\'' +
                 ", phone='" + phone + '\'' +
                 ", address='" + address + '\'' +
                 ", university='" + university + '\'' +

@@ -44,7 +44,7 @@ public class FirebaseAuthController {
             User user = authenticateUser(loginRequest.getUserId());
 
             // Set the logged-in user in your services
-            System.out.println("Logged user id: " + user.getStudentId());
+            System.out.println("Logged user id: " + user.getUserId());
             firebaseServiceItem.setLoggedUser(user);
             firebaseServiceUser.setLoggedUser(user);
 
@@ -72,7 +72,7 @@ public class FirebaseAuthController {
     private User authenticateUser(String userId) {
         // This would normally be a service call to your user repository/database
         User user = new User();
-        user.setStudentId(userId);  // Assuming you fetch user data based on the userId
+        user.setUserId(userId);  // Assuming you fetch user data based on the userId
         return user;
     }
 }

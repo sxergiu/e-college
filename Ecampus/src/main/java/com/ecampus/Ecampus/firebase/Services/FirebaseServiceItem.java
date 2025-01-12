@@ -18,14 +18,16 @@ import java.util.stream.Collectors;
 public class FirebaseServiceItem {
 
     private final Firestore firestore;
+    private final User user;
     private User loggedUser;
 
-    public FirebaseServiceItem(FirebaseApp firebaseApp)
+    public FirebaseServiceItem(FirebaseApp firebaseApp, User user)
     {
         if (firebaseApp == null) {
             throw new IllegalStateException("FirebaseApp is not initialized.");
         }
         this.firestore = FirestoreClient.getFirestore();
+        this.user = user;
     }
 
     public void setLoggedUser(User user) {
@@ -341,7 +343,7 @@ public class FirebaseServiceItem {
 
     public Map<String, List<Item>> returnAllItems() throws FirebaseException, ExecutionException, InterruptedException {
         Map<String, List<Item>> userItemsMap = new HashMap<>();
-        System.out.println("FirbaseServiceItem::returnAllItems" + loggedUser.getStudentId());
+        System.out.println("FirbaseServiceItem::returnAllItems for the logged user: " + loggedUser.getUserId());
         try {
             // Fetch all users from the "users" collection
             CollectionReference usersCollection = firestore.collection("users");
@@ -353,7 +355,7 @@ public class FirebaseServiceItem {
                 if (userDoc.exists()) {
                     String userId = userDoc.getId(); // Assuming userId is the document ID
 
-                    if (!userId.equals(this.loggedUser.getStudentId()))
+                    if (!userId.equals(this.loggedUser.getUserId()))
                     {
                         String username = userDoc.contains("username") ? userDoc.getString("username") : "Unknown";
                         // Fetch items for this user using getItemBySellerId
@@ -371,7 +373,7 @@ public class FirebaseServiceItem {
             System.err.println("Error fetching all items: " + e.getMessage());
             throw e;
         }
-
+        System.out.println("aaaaaaaaaaaaa   " + userItemsMap);
         return userItemsMap;
     }
 

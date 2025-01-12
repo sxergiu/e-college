@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Clock, DollarSign, User, Heart } from "lucide-react";
 import { wishlistService } from '../wishlistService';
 import { createChat } from '../chatService';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const ItemCard = ({ 
   id = '',
   sellerId = '',
-  name = '',
+  name = 'Untitled Item',
   description = '',
   price = 0,
   images = [],
@@ -19,18 +19,16 @@ const ItemCard = ({
   userId,
   onWishlistUpdate,
   isMyItem = false,
-  onEdit, // New prop
-  onDelete, // New prop
+  onEdit,
+  onDelete,
 }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // For image carousel
   const [isLoading, setIsLoading] = useState(false);
   const [isItemWishlisted, setIsItemWishlisted] = useState(isWishlisted);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const handleWishlistToggle = async () => {
-    if (!userId || isMyItem) {
-      console.log('Invalid wishlist request');
-      return;
-    }
+    if (!userId || isMyItem) return;
 
     try {
       setIsLoading(true);
@@ -48,27 +46,21 @@ const ItemCard = ({
       }
     } catch (error) {
       console.error('Error updating wishlist:', error);
-      setIsItemWishlisted(!isItemWishlisted); // Revert state on error
+      setIsItemWishlisted(!isItemWishlisted);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSendMessage = async () => {
-    if (!sellerId || !userId) {
-      console.error("Cannot create chatroom: Missing sellerId or userId.");
-      return;
-    }
+    if (!sellerId || !userId) return;
 
     try {
-      setIsLoading(true); // Optionally, show a loading state
-      // Pass participants as a list
-      const participants = [userId, sellerId]; // List of participants
-      const response = await createChat(participants); // Call your API with the participants list
-
+      setIsLoading(true);
+      const participants = [userId, sellerId];
+      const response = await createChat(participants);
       console.log("Chatroom created successfully:", response.data);
-      navigate(`/chat`); // Redirect to chat page
-      
+      navigate(`/chat`);
     } catch (error) {
       console.error("Error creating chatroom:", error);
     } finally {
@@ -77,29 +69,31 @@ const ItemCard = ({
   };
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return 'No date';
-    try {
-      return new Date(timestamp).toLocaleDateString();
-    } catch (e) {
-      return 'Invalid date';
-    }
+    return timestamp ? new Date(timestamp).toLocaleDateString() : 'No date';
   };
 
   const truncateDescription = (text, maxLength = 150) => {
-    if (!text) return '';
     return text.length <= maxLength ? text : `${text.substr(0, maxLength)}...`;
   };
 
   const truncateId = (idString) => {
-    if (!idString) return '';
     return idString.length > 8 ? `${idString.substring(0, 8)}...` : idString;
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
   };
 
   return (
     <div className="w-full max-w-sm h-full flex flex-col bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Header */}
       <div className="p-4 border-b flex justify-between items-start">
         <div>
-          <h3 className="text-2xl font-semibold">{name || 'Untitled Item'}</h3>
+          <h3 className="text-2xl font-semibold">{name}</h3>
           <div className="flex items-center space-x-2 text-sm text-gray-500 mt-1">
             <Clock size={16} />
             <span>{formatDate(createdAt)}</span>
@@ -124,24 +118,35 @@ const ItemCard = ({
         )}
       </div>
 
-      {Array.isArray(images) && images.length > 0 && (
-        <div className="relative w-full h-58">
+      {/* Image Carousel */}
+      {images.length > 0 && (
+        <div className="relative w-full h-64">
           <img
-            src={images[0]}
+            src={images[currentImageIndex]}
             alt={name}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = "/api/placeholder/400/320";
-            }}
+            onError={(e) => { e.target.src = "/api/placeholder/400/320"; }}
           />
           {images.length > 1 && (
-            <span className="absolute bottom-2 right-2 px-2 py-1 text-xs text-white bg-black/50 rounded-full">
-              +{images.length - 1} more
-            </span>
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full"
+              >
+                ◀
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full"
+              >
+                ▶
+              </button>
+            </>
           )}
         </div>
       )}
 
+      {/* Body */}
       <div className="flex-grow p-4 space-y-4">
         <div className="space-y-2">
           <div className="flex gap-2">
@@ -160,7 +165,6 @@ const ItemCard = ({
             {truncateDescription(description)}
           </p>
         </div>
-
         {sellerId && (
           <div className="flex items-center space-x-2">
             <User size={16} className="text-gray-500" />
@@ -177,12 +181,13 @@ const ItemCard = ({
         )}
       </div>
 
+      {/* Footer */}
       <div className="border-t p-4">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center">
             <DollarSign size={20} className="text-green-600" />
             <span className="text-xl font-bold text-green-600">
-              {typeof price === 'number' ? price.toFixed(2) : '0.00'}
+              ${price.toFixed(2)}
             </span>
           </div>
           {id && (

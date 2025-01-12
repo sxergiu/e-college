@@ -1,5 +1,6 @@
 package com.ecampus.Ecampus.firebase.Services;
 
+import com.ecampus.Ecampus.entities.User;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
@@ -34,5 +35,12 @@ public class FirebaseConfig {
     @Bean
     public Storage firebaseStorage() {
         return StorageOptions.getDefaultInstance().getService();
+    }
+
+    @Bean
+    public User loggedUser()
+    {
+        // Return a User instance (this can be a default user or fetched dynamically)
+        return new User();
     }
 }

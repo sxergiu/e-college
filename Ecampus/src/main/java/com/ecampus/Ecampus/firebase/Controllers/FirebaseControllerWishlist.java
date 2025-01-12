@@ -3,6 +3,7 @@ package com.ecampus.Ecampus.firebase.Controllers;
 import com.ecampus.Ecampus.entities.Item;
 import com.ecampus.Ecampus.entities.Wishlist;
 import com.ecampus.Ecampus.firebase.Services.FirebaseServiceWishlist;
+import com.google.firebase.FirebaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,7 +73,7 @@ public class FirebaseControllerWishlist {
             Wishlist updatedWishlist = firebaseServiceWishlist.addItemToWishlist(userId, productId);
             System.out.println("Tried adding product: " + productId + " to wishlist of user: " + userId);
             return ResponseEntity.ok(updatedWishlist);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | FirebaseException e) {
             return ResponseEntity.internalServerError().body(null);
         }
     }

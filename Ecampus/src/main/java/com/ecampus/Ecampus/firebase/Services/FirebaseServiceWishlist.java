@@ -1,6 +1,7 @@
 package com.ecampus.Ecampus.firebase.Services;
 
 import com.ecampus.Ecampus.entities.Item;
+import com.ecampus.Ecampus.entities.NotificationRequest;
 import com.ecampus.Ecampus.entities.Wishlist;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
@@ -18,12 +19,16 @@ import java.util.concurrent.ExecutionException;
 public class FirebaseServiceWishlist {
 
     private final Firestore firestore;
+    private final NotificationService notificationService;
+    private final FirebaseServiceItem firebaseServiceItem;
 
-    public FirebaseServiceWishlist(FirebaseApp firebaseApp) {
+    public FirebaseServiceWishlist(FirebaseApp firebaseApp, NotificationService notificationService, FirebaseServiceItem firebaseServiceItem) {
         if (firebaseApp == null) {
             throw new IllegalStateException("FirebaseApp is not initialized.");
         }
         this.firestore = FirestoreClient.getFirestore();
+        this.notificationService = notificationService;
+        this.firebaseServiceItem = firebaseServiceItem;
     }
 
     /**
@@ -198,21 +203,38 @@ public class FirebaseServiceWishlist {
      * @param productId The ID of the product to add.
      * @return Updated wishlist.
      */
-    public Wishlist addItemToWishlist(String userId, String productId) throws ExecutionException, InterruptedException {
+    public Wishlist addItemToWishlist(String userId, String productId) throws ExecutionException, InterruptedException, FirebaseException {
+
         try {
             Wishlist wishlist = getWishlistByUserId(userId);
             System.out.println("Attempting to add item to wishlist: " + wishlist);
-            if (wishlist == null ) {
+
+            // If the wishlist doesn't exist, create a new one
+            if (wishlist == null) {
                 wishlist = new Wishlist(userId);
             }
 
+            // Add the productId to the wishlist if not already present
             if (!wishlist.getProductIds().contains(productId)) {
                 wishlist.getProductIds().add(productId);
 
-
-                // Update Firestore
+                // Update Firestore with the new wishlist
                 ApiFuture<WriteResult> writeResult = firestore.collection("wishlists").document(userId).set(wishlist);
                 writeResult.get(); // Wait for the write to complete
+
+                // Send a notification to the seller that their item has been wishlisted
+                Item item = firebaseServiceItem.getItem(productId); // Fetch the item details (e.g., sellerId)
+                if (item != null && item.getSellerId() != null) {
+                    String sellerId = item.getSellerId();
+                    String title = "Item Wishlisted!";
+                    String message = "Your item '" + item.getName() + "' has been added to someone's wishlist.";
+
+                    // Create a notification request
+                    NotificationRequest notificationRequest = new NotificationRequest(sellerId, title, message, productId);
+
+                    // Post the notification
+                    notificationService.postNotification(notificationRequest);
+                }
             }
 
             return wishlist;
@@ -221,6 +243,7 @@ public class FirebaseServiceWishlist {
             throw e;
         }
     }
+
 
     /**
      * Removes a product ID from the user's wishlist.

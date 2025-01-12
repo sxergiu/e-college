@@ -1,19 +1,20 @@
 package com.ecampus.Ecampus.entities;
 
+
 public class NotificationRequest {
     private String userId;
     private String title;
     private String message;
+    private String itemId; // Add itemId to track the specific item
 
-    public NotificationRequest() {
-    }
-
-    public NotificationRequest(String userId, String title, String message) {
+    // Constructor
+    public NotificationRequest(String userId, String title, String message, String itemId) {
         this.userId = userId;
         this.title = title;
         this.message = message;
+        this.itemId = itemId;
     }
-
+    // Getters and setters
     public String getUserId() {
         return userId;
     }
@@ -36,5 +37,13 @@ public class NotificationRequest {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 }

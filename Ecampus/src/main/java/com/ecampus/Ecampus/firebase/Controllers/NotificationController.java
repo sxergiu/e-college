@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/notifications")
@@ -27,12 +28,20 @@ public class NotificationController {
     @PostMapping("/send")
     public ResponseEntity<String> postNotification(@RequestBody NotificationRequest request) {
         try {
+            // Ensure that itemId is passed in the request body
+            if (request.getItemId() == null || request.getItemId().isEmpty()) {
+                return ResponseEntity.status(400).body("Error: Item ID is required.");
+            }
+
+            // Call the service method to post the notification, passing the itemId as well
             String notificationId = notificationService.postNotification(request);
+
             return ResponseEntity.ok("Notification created with ID: " + notificationId);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error creating notification: " + e.getMessage());
         }
     }
+
 
     /**
      * Retrieve all notifications for a specific user.
@@ -47,6 +56,16 @@ public class NotificationController {
             return ResponseEntity.ok(notifications);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error fetching notifications: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{notificationId}/read")
+    public String markNotificationAsRead(@PathVariable String notificationId) {
+        try {
+            notificationService.markNotificationAsRead(notificationId);
+            return "Notification marked as read successfully.";
+        } catch (ExecutionException | InterruptedException e) {
+            return "Error marking notification as read: " + e.getMessage();
         }
     }
 }

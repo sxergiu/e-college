@@ -33,11 +33,13 @@ public class NotificationService {
         notification.put("message", request.getMessage());
         notification.put("isRead", false);
         notification.put("timestamp", FieldValue.serverTimestamp());
+        notification.put("itemId", request.getItemId());  // Add itemId to track the product related to the notification
 
         DocumentReference notificationRef = db.collection("notifications").document();
         notificationRef.set(notification).get();
         return notificationRef.getId();
     }
+
 
     // Retrieve notifications for a specific user
     public List<Map<String, Object>> getNotifications(String userId) throws ExecutionException, InterruptedException {

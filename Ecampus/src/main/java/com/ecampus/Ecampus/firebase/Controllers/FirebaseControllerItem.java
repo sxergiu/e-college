@@ -1,6 +1,7 @@
 package com.ecampus.Ecampus.firebase.Controllers;
 
 import com.ecampus.Ecampus.entities.Item;
+import com.ecampus.Ecampus.entities.User;
 import com.ecampus.Ecampus.firebase.Services.FirebaseServiceItem;
 import com.google.firebase.FirebaseException;
 import org.slf4j.Logger;
@@ -93,14 +94,17 @@ public class FirebaseControllerItem {
     }
 
     @GetMapping("/returnAllItems")
-    public ResponseEntity<Map<String, List<Item>>> returnAllItems() {
-        try {
+    public ResponseEntity<Map<String, List<Item>>> returnAllItems( )throws ExecutionException, InterruptedException, FirebaseException
+    {
+        try
+        {
             // Call the service method
             Map<String, List<Item>> allItems = firebaseServiceItem.returnAllItems();
 
             // Return the result
             return ResponseEntity.ok(allItems);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             // Handle errors and return 500 Internal Server Error
             System.err.println("Error returning all items: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -144,4 +148,6 @@ public class FirebaseControllerItem {
             return ResponseEntity.status(500).body("Unexpected error occurred.");
         }
     }
+
+
 }

@@ -55,10 +55,14 @@ const Dashboard = () => {
         const response = await axios.get("http://localhost:8080/item/returnAllItems");
         setItems(response.data);
         setFilteredItems(response.data);
-
+        console.log(response.data);
+  
         const wishlistResponse = await axios.get(`http://localhost:8080/wishlist/${currentUser.uid}`);
-        setWishlist(wishlistResponse.data);
-
+        console.log(wishlistResponse.data);
+        
+        // Default to an empty object if no wishlist is returned
+        setWishlist(wishlistResponse.data || { productIds: [] });
+  
         setLoading(false); // Stop loading
       } catch (err) {
         console.error("Error fetching items:", err);
@@ -66,7 +70,7 @@ const Dashboard = () => {
         setLoading(false); // Stop loading on error
       }
     };
-
+  
     fetchItems();
   }, []);
 
@@ -136,21 +140,22 @@ const Dashboard = () => {
                 <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                   {sellerItems.map((item) => (
                     <ItemCard
-                      key={item.id}
-                      id={item.id}
-                      sellerId={item.sellerId}
-                      name={item.name}
-                      description={item.description}
-                      price={item.price}
-                      images={item.images}
-                      isSold={item.isSold}
-                      condition={item.condition}
-                      category={item.category}
-                      createdAt={item.createdAt}
-                      onWishlistUpdate={handleWishlistUpdate}
-                      userId={currentUser.uid} // Updated to use uid
-                      isWishlisted={wishlist.productIds.includes(item.id)} // Check if item is in wishlist
-                    />
+                    key={item.id}
+                    id={item.id}
+                    sellerId={item.sellerId}
+                    name={item.name}
+                    description={item.description}
+                    price={item.price}
+                    images={item.images}
+                    isSold={item.isSold}
+                    condition={item.condition}
+                    category={item.category}
+                    createdAt={item.createdAt}
+                    onWishlistUpdate={handleWishlistUpdate}
+                    userId={currentUser.uid} // Updated to use uid
+                    isWishlisted={wishlist?.productIds?.includes(item.id) || false} // Safely check wishlist
+                  />
+                  
                   ))}
                 </div>
               </div>

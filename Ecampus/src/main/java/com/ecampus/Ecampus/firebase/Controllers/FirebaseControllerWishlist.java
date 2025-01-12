@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -28,13 +31,17 @@ public class FirebaseControllerWishlist {
         try {
             Wishlist wishlist = firebaseServiceWishlist.getWishlistByUserId(userId);
             if (wishlist == null) {
-                return ResponseEntity.notFound().build();
+                // Return an empty wishlist object
+                wishlist = new Wishlist();
+                wishlist.setProductIds(new ArrayList<>());
             }
             return ResponseEntity.ok(wishlist);
         } catch (ExecutionException | InterruptedException e) {
             return ResponseEntity.internalServerError().body(null);
         }
     }
+
+
 
     /**
      * Get all items in a user's wishlist by their user ID.

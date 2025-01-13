@@ -187,5 +187,42 @@ public class FirebaseServiceUser
         }
     }
 
+    public String addFunds(String uid, Double amount) throws ExecutionException, InterruptedException {
+        if (amount == null || amount <= 0) {
+            throw new IllegalArgumentException("The amount to add must be greater than zero.");
+        }
+
+        try {
+            // Get the user document from Firestore
+            DocumentReference userRef = firestore.collection("users").document(uid);
+            ApiFuture<DocumentSnapshot> future = userRef.get();
+            DocumentSnapshot document = future.get();
+
+            if (!document.exists()) {
+                throw new IllegalArgumentException("User not found with uid: " + uid);
+            }
+
+            // Convert document to User object
+            User user = document.toObject(User.class);
+            if (user == null) {
+                throw new IllegalStateException("Failed to convert document to User object");
+            }
+
+            // Update the user's balance by adding the amount
+            Double newBalance = user.getBalance() + amount;
+            user.setBalance(newBalance);
+
+            // Update the document with the new balance
+            ApiFuture<WriteResult> updateFuture = userRef.set(user);
+            updateFuture.get();  // Wait for the update to complete
+
+            return "Successfully added " + amount + " to the balance. New balance: " + newBalance;
+
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error adding funds: " + e.getMessage());
+            throw e;
+        }
+    }
+
 
 }

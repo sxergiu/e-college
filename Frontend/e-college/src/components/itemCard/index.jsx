@@ -219,7 +219,7 @@ const ItemCard = ({
           <div className="mt-4">
             <button
               className={`w-full px-4 py-2 text-white font-semibold rounded-lg ${
-                purchaseLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+                purchaseLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600'
               }`}
               onClick={handleBuyItem}
               disabled={purchaseLoading}

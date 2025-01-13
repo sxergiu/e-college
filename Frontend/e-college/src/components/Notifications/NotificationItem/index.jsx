@@ -22,22 +22,24 @@ const NotificationItem = ({ notification, fetchNotifications }) => {
 
   return (
     <div
-      className={`p-3 border-b ${notification.isRead ? 'bg-gray-200' : 'bg-gray-100'} flex justify-between items-start`}
-    >
-      <div>
-        <h4 className="font-semibold text-gray-800">{notification.title}</h4>
-        <p className="text-gray-600">{notification.message}</p>
-        <p className="text-sm text-gray-500">{formatTimestamp(notification.timestamp)}</p>
-      </div>
-      
-      <button
-        onClick={markAsRead}
-        disabled={notification.isRead}
-        className={`ml-4 p-2 rounded-md ${notification.isRead ? 'text-gray-400' : 'text-indigo-600'} ${notification.isRead ? 'bg-gray-300' : 'hover:bg-indigo-600 hover:text-white'} transition-colors duration-300`}
-      >
-        <CheckCircle size={20} />
-      </button>
-    </div>
+  className={`p-3 border-b flex justify-between items-start ${notification.isRead ? 'bg-gray-200' : 'bg-gray-100'}`}
+>
+  {/* Notification Content */}
+  <div className="flex-grow">
+    <h4 className="font-semibold text-gray-800">{notification.title}</h4>
+    <p className="text-gray-600">{notification.message}</p>
+    <p className="text-sm text-gray-500">{formatTimestamp(notification.timestamp)}</p>
+  </div>
+
+  {/* Mark as Read Button */}
+  <button
+    onClick={markAsRead}
+    disabled={notification.isRead}
+    className={`ml-4 p-2 rounded-md ${notification.isRead ? 'text-gray-400' : 'text-indigo-600'} ${notification.isRead ? 'bg-gray-300' : 'hover:bg-indigo-600 hover:text-white'} transition-colors duration-300`}
+  >
+    <CheckCircle size={20} />
+  </button>
+</div>
   );
 };
 

@@ -24,14 +24,14 @@ const NotificationTab = () => {
   };
 
   return (
-    <div className="fixed right-5 top-20 w-80 bg-white border border-gray-300 p-4 shadow-lg">
+    <div className="fixed right-5 top-20 w-81 bg-white border border-gray-300 p-4 shadow-lg">
       {/* Header */}
       <div className="text-lg font-semibold text-gray-800 mb-4">
         Notifications
       </div>
 
       {/* Notification List */}
-      <div className="mt-4 space-y-2 max-h-[400px] overflow-y-auto">
+      <div className="mt-4   max-h-[400px] overflow-y-auto">
         {loading ? (
           <p>Loading notifications...</p>
         ) : notifications.length === 0 ? (

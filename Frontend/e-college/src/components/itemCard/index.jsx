@@ -3,6 +3,7 @@ import { Clock, DollarSign, User, Heart } from "lucide-react";
 import { wishlistService } from '../wishlistService';
 import { createChat } from '../chatService';
 import { useNavigate } from 'react-router-dom';
+import { purchaseItem } from '../purchaseItem/purchaseService'; // Assuming you have a service for purchases
 
 const ItemCard = ({ 
   id = '',
@@ -25,6 +26,7 @@ const ItemCard = ({
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // For image carousel
   const [isLoading, setIsLoading] = useState(false);
   const [isItemWishlisted, setIsItemWishlisted] = useState(isWishlisted);
+  const [purchaseLoading, setPurchaseLoading] = useState(false); // Loading state for purchase
   const navigate = useNavigate();
 
   const handleWishlistToggle = async () => {
@@ -67,6 +69,24 @@ const ItemCard = ({
       setIsLoading(false);
     }
   };
+
+  const handleBuyItem = async () => {
+    if (!userId || !id || isMyItem || isSold) return;
+  
+    try {
+      setPurchaseLoading(true);
+      const response = await purchaseItem({ buyerId: userId, itemId: id });
+      console.log("Purchase successful:", response.data);
+      alert('Item purchased successfully!');
+      // Optionally refresh the page or update UI
+    } catch (error) {
+      console.error('Error purchasing item:', error);
+      alert('Failed to purchase item. Please try again.');
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+  
 
   const formatDate = (timestamp) => {
     return timestamp ? new Date(timestamp).toLocaleDateString() : 'No date';
@@ -195,19 +215,16 @@ const ItemCard = ({
             </div>
           )}
         </div>
-        {isMyItem && (
-          <div className="flex justify-between mt-4">
+        {!isMyItem && !isSold && (
+          <div className="mt-4">
             <button
-              className="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600"
-              onClick={() => onEdit(id)}
+              className={`w-full px-4 py-2 text-white font-semibold rounded-lg ${
+                purchaseLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+              onClick={handleBuyItem}
+              disabled={purchaseLoading}
             >
-              Edit
-            </button>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-              onClick={() => onDelete(id)}
-            >
-              Delete
+              {purchaseLoading ? 'Processing...' : 'Buy Item'}
             </button>
           </div>
         )}

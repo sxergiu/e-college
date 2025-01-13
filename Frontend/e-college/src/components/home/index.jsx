@@ -1,22 +1,31 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../../auth_context';
-import { auth, storage } from '../../firebase/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import axios from "axios";
-
+import { auth } from '../../firebase/firebase';
+import axios from 'axios';
 
 const Home = () => {
   const { userLoggedIn } = useAuth();
   const currentUser = auth.currentUser;
   const fileInputRef = useRef(null);
 
-  const [profileData, setProfileData] = useState({});
+  const [profileData, setProfileData] = useState({
+    balance: 0,
+    name: '',
+    username: '',
+    email: '',
+    phone: '',
+    address: '',
+    university: '',
+    bio: '',
+    image: '',
+    rating: 0,
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
 
-  console.log(currentUser.uid)
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -50,36 +59,33 @@ const Home = () => {
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     try {
       setUploadingImage(true);
-  
+
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "image_upload"); // Cloudinary preset
-      formData.append("cloud_name", "dqfiftv8y"); // Cloudinary cloud name
-  
+      formData.append('file', file);
+      formData.append('upload_preset', 'image_upload'); // Cloudinary preset
+      formData.append('cloud_name', 'dqfiftv8y'); // Cloudinary cloud name
+
       const response = await axios.post(
-        `https://api.cloudinary.com/v1_1/dqfiftv8y/image/upload`, 
+        `https://api.cloudinary.com/v1_1/dqfiftv8y/image/upload`,
         formData
       );
-  
+
       if (response.data.secure_url) {
-        console.log("Uploaded Image URL: ", response.data.secure_url);
         setProfileData((prev) => ({ ...prev, image: response.data.secure_url }));
         setIsDataChanged(true); // Mark as data changed
       } else {
-        console.error("Failed to upload image, no URL returned.");
+        console.error('Failed to upload image, no URL returned.');
       }
     } catch (error) {
-      console.error("Error uploading image to Cloudinary:", error);
-      alert("Failed to upload image. Please try again.");
+      console.error('Error uploading image to Cloudinary:', error);
+      alert('Failed to upload image. Please try again.');
     } finally {
       setUploadingImage(false);
     }
   };
-  
-  
 
   const handleDataChanged = useCallback((field, value) => {
     setProfileData((prev) => ({
@@ -92,67 +98,102 @@ const Home = () => {
   const handleSave = useCallback(async () => {
     try {
       if (!profileData.name || !profileData.university) {
-        alert("Please fill out all required fields before saving.");
-        return;
-      }
-  
-      // Send the request to the backend with the updated image URL and other profile data
-      if (!profileData.image) {
-        console.error("No image URL set.");
-        alert("Image upload failed or URL is missing.");
+        alert('Please fill out all required fields before saving.');
         return;
       }
 
-      console.log(profileData)
+      if (!profileData.image) {
+        console.error('No image URL set.');
+        alert('Image upload failed or URL is missing.');
+        return;
+      }
+
       const response = await fetch(`http://localhost:8080/user/updateUser`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: profileData.name,
-          university: profileData.university,
-          phone: profileData.phone, 
-          address: profileData.address,
-          image: profileData.image, // The URL from Cloudinary that was set in the frontend
-          id: profileData.id,
-          username: profileData.username,
-          email: profileData.email,
-          bio: profileData.bio || '',
-          balance: profileData.balance || 0,
-          rating: profileData.rating || 0,
-        }),
+        body: JSON.stringify(profileData),
       });
-  
+
       if (!response.ok) {
         const errorMessage = await response.text();
         throw new Error(errorMessage);
       }
-  
-      // Handle success (e.g., show a success message)
+
       alert('Profile updated successfully!');
       setIsEditing(false);
-  
-      // Optionally, fetch the updated user data again or reset states if needed
-      // await fetchUserData();  // Uncomment if you need to reload the data from the backend
-  
     } catch (error) {
       console.error('Error updating profile:', error);
       alert(`Failed to update profile: ${error.message}`);
     }
-  }, [profileData, currentUser]);
-  
+  }, [profileData]);
 
-  
   const handleCancel = useCallback(() => {
     setIsEditing(false);
     setIsDataChanged(false);
-    if (currentUser) {
-      setProfileData((prev) => ({
-        ...prev,
-        name: currentUser.displayName || 'No name set',
-        image: currentUser.photoURL || 'https://via.placeholder.com/80',
-      }));
-    }
-  }, [currentUser]);
+  }, []);
+
+  const AddFundsModal = ({ isOpen, onClose, onFundsAdded }) => {
+    const [amount, setAmount] = useState('');
+    const [isAdding, setIsAdding] = useState(false);
+
+    const handleAddFunds = async () => {
+      if (!amount || isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount.');
+        return;
+      }
+
+      try {
+        setIsAdding(true);
+        const response = await axios.post(
+          `http://localhost:8080/user/addFunds/${auth.currentUser.uid}`,
+          null,
+          { params: { amount } }
+        );
+
+        alert('Funds added successfully!');
+        onFundsAdded(parseFloat(amount)); // Notify parent component about the updated balance
+        onClose(); // Close the modal
+      } catch (error) {
+        console.error('Error adding funds:', error);
+        alert('Failed to add funds. Please try again later.');
+      } finally {
+        setIsAdding(false);
+      }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
+        <div className="bg-white p-6 rounded shadow-lg w-96">
+          <h2 className="text-xl font-bold mb-4">Add Funds</h2>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Enter amount"
+            className="border rounded px-4 py-2 w-full mb-4"
+          />
+          <div className="flex justify-end space-x-2">
+            <button
+              className="px-4 py-2 bg-gray-300 rounded"
+              onClick={onClose}
+              disabled={isAdding}
+            >
+              Cancel
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${isAdding ? 'bg-indigo-300' : 'bg-indigo-600 text-white'}`}
+              onClick={handleAddFunds}
+              disabled={isAdding}
+            >
+              {isAdding ? 'Adding...' : 'Add Funds'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (!userLoggedIn) {
     return (
@@ -177,7 +218,7 @@ const Home = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Profile</h1>
         <div className="space-x-2">
-          {isEditing && (
+          {isEditing ? (
             <>
               <button
                 className="px-4 py-2 border rounded-lg bg-white text-gray-700 hover:bg-gray-50"
@@ -186,18 +227,15 @@ const Home = () => {
                 Cancel
               </button>
               <button
-                className={`px-4 py-2 rounded-lg ${
-                  !isDataChanged ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-                } text-white`}
+                className={`px-4 py-2 rounded-lg ${!isDataChanged ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                  } text-white`}
                 disabled={!isDataChanged}
                 onClick={handleSave}
               >
                 Save Changes
               </button>
             </>
-          )}
-
-          {!isEditing && (
+          ) : (
             <button
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
               onClick={() => setIsEditing(true)}
@@ -205,6 +243,12 @@ const Home = () => {
               Edit Profile
             </button>
           )}
+          <button
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+            onClick={() => setModalOpen(true)}
+          >
+            Add Funds
+          </button>
         </div>
       </div>
 
@@ -276,6 +320,10 @@ const Home = () => {
               <p className="text-gray-600">Username: {profileData.username}</p>
             </div>
           </div>
+          <div className="mb-4">
+            <h3 className="text-lg font-bold">Balance: ${profileData.balance.toFixed(
+              2)}</h3>
+          </div>
 
           <div className="space-y-4">
             <div>
@@ -303,7 +351,7 @@ const Home = () => {
                   className="border rounded px-2 py-1 w-full"
                 />
               ) : (
-                <p className="mt-1">{profileData.address}</p>
+                <p className="mt-1">{profileData.address || 'No address set'}</p>
               )}
             </div>
 
@@ -332,28 +380,19 @@ const Home = () => {
             </div>
           </div>
         </div>
-
-        <div className="flex-1 bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Balance Information</h2>
-          <div className="flex items-center space-x-4">
-            <p className="text-xl font-bold">
-              Balance: ${profileData.balance?.toFixed(2) || '0.00'}
-            </p>
-
-            <button
-              className={`px-4 py-2 rounded-lg ${
-                isEditing ? 'bg-indigo-300 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
-              } text-white`}
-              onClick={() => alert('Add funds feature not implemented yet')}
-              disabled={isEditing}
-            >
-              Add Funds
-            </button>
-          </div>
-        </div>
       </div>
+
+      <AddFundsModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onFundsAdded={(addedFunds) => {
+          setProfileData((prev) => ({
+            ...prev,
+            balance: prev.balance + addedFunds,
+          }));
+        }}
+      />
     </div>
   );
 };
-
 export default Home;

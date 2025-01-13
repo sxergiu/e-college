@@ -1,6 +1,7 @@
 package com.ecampus.Ecampus.firebase.Services;
 
 import com.ecampus.Ecampus.entities.Item;
+import com.ecampus.Ecampus.entities.NotificationRequest;
 import com.ecampus.Ecampus.entities.Transaction;
 import com.ecampus.Ecampus.entities.User;
 import com.google.api.core.ApiFuture;
@@ -21,14 +22,16 @@ public class FirebaseServiceItem {
     private final Firestore firestore;
     private final User user;
     private User loggedUser;
+    private final NotificationService notificationService;
 
-    public FirebaseServiceItem(FirebaseApp firebaseApp, User user)
+    public FirebaseServiceItem(FirebaseApp firebaseApp, User user, NotificationService notificationService)
     {
         if (firebaseApp == null) {
             throw new IllegalStateException("FirebaseApp is not initialized.");
         }
         this.firestore = FirestoreClient.getFirestore();
         this.user = user;
+        this.notificationService = notificationService;
     }
 
     public void setLoggedUser(User user) {
@@ -643,6 +646,27 @@ public class FirebaseServiceItem {
                     CollectionReference transactionsRef = firestore.collection("transactions");
                     ApiFuture<DocumentReference> transactionRefFuture = transactionsRef.add(transaction);
                     transactionRefFuture.get();
+
+                    String sellerId = item.getSellerId();
+                    String title = "Item '" + item.getName() + "' was sold!";
+                    String message = "Buyer id: " + buyerId;
+
+                    // Create a notification request
+                    NotificationRequest notificationRequest = new NotificationRequest(sellerId, title, message, item.getId());
+
+                    // Post the notification
+                    notificationService.postNotification(notificationRequest);
+
+                    String title2 = "Item Purchased!";
+                    String message2 = "You just purchased '" + item.getName() +"'.";
+
+                    // Create a notification request
+                    NotificationRequest notificationRequest2 = new NotificationRequest(buyerId, title2, message2, item.getId());
+
+                    // Post the notification
+                    notificationService.postNotification(notificationRequest);
+                    notificationService.postNotification(notificationRequest2);
+
                     return transaction;
                 }
                 return null;

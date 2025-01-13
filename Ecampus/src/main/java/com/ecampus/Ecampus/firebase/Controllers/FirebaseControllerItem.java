@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.DelegatingServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
-
+import com.ecampus.Ecampus.entities.Transaction;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +148,26 @@ public class FirebaseControllerItem {
             return ResponseEntity.status(500).body("Unexpected error occurred.");
         }
     }
+
+    @PostMapping("/buyItem/{itemId}")
+    public ResponseEntity<Transaction> buyItem(
+            @PathVariable String itemId,
+            @RequestParam String buyerId) {
+        try {
+            System.out.println(itemId + " " + buyerId);
+            Transaction transaction = new Transaction();
+            transaction = firebaseServiceItem.buyItem(buyerId, itemId);
+            System.out.println(transaction.toString());
+            return ResponseEntity.ok(transaction);
+        } catch (ExecutionException | InterruptedException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);
+        }
+    }
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.ecampus.Ecampus.firebase.Services;
 
 import com.ecampus.Ecampus.entities.Item;
+import com.ecampus.Ecampus.entities.Transaction;
 import com.ecampus.Ecampus.entities.User;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
@@ -426,4 +427,236 @@ public class FirebaseServiceItem {
         }
         return null;
     }
+
+    public Double handleItemTransaction(Item item, String buyerId, String itemId) throws ExecutionException, InterruptedException
+    {
+        DocumentReference buyerRef = firestore.collection("users").document(buyerId);
+        ApiFuture<DocumentSnapshot> buyerSnapshotFuture = buyerRef.get();
+        DocumentSnapshot buyerSnapshot = buyerSnapshotFuture.get();
+
+        if (!buyerSnapshot.exists()) {
+            System.err.println("Buyer not found.");
+            return null;
+        }
+
+        User buyer = buyerSnapshot.toObject(User.class);
+        if (buyer == null) {
+            System.err.println("Error retrieving buyer data.");
+            return null;
+        }
+
+        // Check if the buyer has enough balance
+        if (buyer.getBalance() < item.getPrice()) {
+            System.err.println("Insufficient funds.");
+            return null;
+        }
+
+        // Fetch the seller details (stored in the item document)
+        String sellerId = item.getSellerId();
+        DocumentReference sellerRef = firestore.collection("users").document(sellerId);
+        ApiFuture<DocumentSnapshot> sellerSnapshotFuture = sellerRef.get();
+        DocumentSnapshot sellerSnapshot = sellerSnapshotFuture.get();
+
+        if (!sellerSnapshot.exists()) {
+            System.err.println("Seller not found.");
+            return null;
+        }
+
+        User seller = sellerSnapshot.toObject(User.class);
+        if (seller == null) {
+            System.err.println("Error retrieving seller data.");
+            return null;
+        }
+
+        // Deduct the price from buyer's balance and add to seller's balance
+        double price = item.getPrice();
+        buyer.setBalance(buyer.getBalance() - price);
+        seller.setBalance(seller.getBalance() + price);
+
+        // Update buyer and seller balances in Firestore
+        ApiFuture<WriteResult> buyerUpdate = buyerRef.set(buyer);
+        ApiFuture<WriteResult> sellerUpdate = sellerRef.set(seller);
+
+        // Wait for the balance updates to complete
+        buyerUpdate.get();
+        sellerUpdate.get();
+        item.setSold(true);
+        return price;
+    }
+    public Transaction buyItem(String buyerId, String itemId) throws ExecutionException, InterruptedException
+    {
+        try
+        {
+            // Fetch the document reference from Firestore
+            DocumentReference documentReference = firestore.collection("items").document(itemId);
+            ApiFuture<DocumentSnapshot> documentSnapshotApiFuture = documentReference.get();
+            DocumentSnapshot documentSnapshot = documentSnapshotApiFuture.get();
+
+            if (documentSnapshot.exists())
+            {
+                System.out.println("Retrieved document data: " + documentSnapshot.getData());
+
+                // Create the Item object
+                Item item = new Item();
+                item.setId(documentSnapshot.getId());
+                // Check the type of each field and convert accordingly
+
+                // Check and set sellerId (String)
+                if (documentSnapshot.contains("sellerId"))
+                {
+                    Object sellerId = documentSnapshot.get("sellerId");
+                    if (sellerId instanceof String)
+                    {
+                        item.setSellerId((String) sellerId);
+                    } else
+                    {
+                        System.err.println("Invalid type for sellerId");
+                    }
+                }
+
+                // Check and set name (String)
+                if (documentSnapshot.contains("name"))
+                {
+                    Object name = documentSnapshot.get("name");
+                    if (name instanceof String)
+                    {
+                        item.setName((String) name);
+                    } else
+                    {
+                        System.err.println("Invalid type for name");
+                    }
+                }
+
+                // Check and set description (String)
+                if (documentSnapshot.contains("description"))
+                {
+                    Object description = documentSnapshot.get("description");
+                    if (description instanceof String)
+                    {
+                        item.setDescription((String) description);
+                    } else
+                    {
+                        System.err.println("Invalid type for description");
+                    }
+                }
+
+                // Check and set price (Double)
+                if (documentSnapshot.contains("price"))
+                {
+                    Object price = documentSnapshot.get("price");
+                    if (price instanceof Double)
+                    {
+                        item.setPrice((Double) price);
+                    } else if (price instanceof Long)
+                    {
+                        item.setPrice(((Long) price).doubleValue());
+                    } else
+                    {
+                        System.err.println("Invalid type for price");
+                    }
+                }
+
+                // Check and set category (ItemCategory)
+                if (documentSnapshot.contains("condition"))
+                {
+                    Object condition = documentSnapshot.get("condition");
+                    System.out.println("Condition received: " + condition);
+                    if (condition instanceof String)
+                    {
+                        item.setCondition((String) condition);
+                    } else
+                    {
+                        assert condition != null;
+                        System.err.println("Invalid type for condition: " + condition.getClass());
+                    }
+                }
+
+                // Check and set images (List<String>)
+                if (documentSnapshot.contains("images"))
+                {
+                    Object images = documentSnapshot.get("images");
+                    if (images instanceof List)
+                    {
+                        List<?> imagesList = (List<?>) images;
+                        // Check that the list contains only Strings
+                        if (imagesList.isEmpty() || imagesList.get(0) instanceof String)
+                        {
+                            item.setImages((List<String>) images);
+                        } else
+                        {
+                            System.err.println("Invalid type for images");
+                        }
+                    } else
+                    {
+                        System.err.println("Invalid type for images");
+                    }
+                }
+
+                // Check and set condition (ItemCondition)
+                if (documentSnapshot.contains("category"))
+                {
+                    Object category = documentSnapshot.get("category");
+                    System.out.println("Category received: " + category);
+                    if (category instanceof String)
+                    {
+                        item.setCategory((String) category);
+                    } else
+                    {
+                        assert category != null;
+                        System.err.println("Invalid type for category: " + category.getClass());
+                    }
+                }
+
+                // Check and set createdAt (Timestamp)
+                if (documentSnapshot.contains("createdAt"))
+                {
+                    Object createdAt = documentSnapshot.get("createdAt");
+                    if (createdAt instanceof Timestamp)
+                    {
+                        item.setCreatedAt(((Timestamp) createdAt).toSqlTimestamp());
+                    } else
+                    {
+                        System.err.println("Invalid type for createdAt");
+                    }
+                }
+
+                // Check and set updatedAt (Timestamp)
+                if (documentSnapshot.contains("updatedAt"))
+                {
+                    Object updatedAt = documentSnapshot.get("updatedAt");
+                    if (updatedAt instanceof Timestamp)
+                    {
+                        item.setUpdatedAt(((Timestamp) updatedAt).toSqlTimestamp());
+                    } else
+                    {
+                        System.err.println("Invalid type for updatedAt");
+                    }
+                }
+                if (handleItemTransaction(item, buyerId, itemId) != null)
+                {
+                    Transaction transaction = new Transaction();
+                    transaction.setItemId(item.getId());
+                    transaction.setSellerId(item.getSellerId());
+                    transaction.setBuyerId(buyerId);
+                    transaction.setTimestamp(new Date());
+                    System.out.println("Transaction created: " + transaction.toString());
+                    CollectionReference transactionsRef = firestore.collection("transactions");
+                    ApiFuture<DocumentReference> transactionRefFuture = transactionsRef.add(transaction);
+                    transactionRefFuture.get();
+                    return transaction;
+                }
+                return null;
+            } else
+            {
+                System.out.println("Item with document ID " + itemId + " does not exist.");
+                return null;
+            }
+        } catch (Exception e)
+        {
+            System.err.println("Error fetching item: " + e.getMessage());
+            throw e;
+        }
+    }
+
+
 }

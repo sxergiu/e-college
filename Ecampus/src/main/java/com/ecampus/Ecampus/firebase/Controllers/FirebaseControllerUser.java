@@ -80,4 +80,23 @@ public class FirebaseControllerUser
         }
     }
 
+    @PostMapping("/addFunds/{uid}")
+    public ResponseEntity<String> addFunds(@PathVariable String uid, @RequestParam Double amount) {
+        try {
+            System.out.println(uid+ " " + amount);
+            // Call the service method to add funds
+            String result = firebaseService.addFunds(uid, amount);
+
+            // Return a success response with the result message
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            // Handle invalid argument (e.g., amount <= 0)
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (ExecutionException | InterruptedException e) {
+            // Handle Firestore interaction errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error adding funds to the user account. Please try again later.");
+        }
+    }
+
 }

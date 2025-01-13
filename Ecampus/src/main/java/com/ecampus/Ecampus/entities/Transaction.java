@@ -1,75 +1,61 @@
 package com.ecampus.Ecampus.entities;
 
-import com.ecampus.Ecampus.entities.Item;
-import com.ecampus.Ecampus.entities.User;
-
 import java.util.Date;
 
 public class Transaction {
-    private String id;
-    private User buyer; // Buyer information
-    private User seller; // Seller information
-    private Item item; // Item involved in the transaction
-    private Date transactionDate; // Date of the transaction
-
-    // Constructor
-    public Transaction(String id, User buyer, User seller, Item item, Date transactionDate, String status) {
-        this.id = id;
-        this.buyer = buyer;
-        this.seller = seller;
-        this.item = item;
-        this.transactionDate = transactionDate;
-    }
+    private String itemId;
+    private String buyerId;
+    private String sellerId;
+    private Date timestamp;
 
     // Getters and Setters
-    public String getId() {
-        return id;
+    public Transaction()
+    {
+
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public Transaction(String itemId, String buyerId, String sellerId, Date timestamp)
+    {
+        this.itemId = itemId;
+        this.buyerId = buyerId;
+        this.sellerId = sellerId;
+        this.timestamp = timestamp;
     }
 
-    public User getBuyer() {
-        return buyer;
+    public String getItemId() {
+        return itemId;
     }
 
-    public void setBuyer(User buyer) {
-        this.buyer = buyer;
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 
-    public User getSeller() {
-        return seller;
+    public String getBuyerId() {
+        return buyerId;
     }
 
-    public void setSeller(User seller) {
-        this.seller = seller;
+    public void setBuyerId(String buyerId) {
+        this.buyerId = buyerId;
     }
 
-    public Item getItem() {
-        return item;
+    public String getSellerId() {
+        return sellerId;
     }
 
-    public void setItem(Item item) {
-        this.item = item;
+    public void setSellerId(String sellerId) {
+        this.sellerId = sellerId;
     }
 
-    public Date getTransactionDate() {
-        return transactionDate;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setTransactionDate(Date transactionDate) {
-        this.transactionDate = transactionDate;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id='" + id + '\'' +
-                ", buyer=" + buyer.getName() +
-                ", seller=" + seller.getName() +
-                ", item=" + item.getName() +
-                ", transactionDate=" + transactionDate +
-                '}';
+    public String toString()
+    {
+        return "Transaction: " + itemId + ", " + buyerId + ", " + sellerId + ", " + timestamp;
     }
 }
